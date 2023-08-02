@@ -370,7 +370,7 @@ async def sydney_reply(content, context, method="random"):
         print(f"context: {context}")
         print(f"ask_string: {ask_string}")
 
-    openai.proxy = "http://127.0.0.1:10809"
+    openai.proxy = "" #paste your local http port such as http://127.0.0.1:10809
     failed = False
     modified = False
     current_model = str("gpt-3.5-turbo")
