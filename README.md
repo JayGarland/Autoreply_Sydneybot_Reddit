@@ -100,7 +100,9 @@ The bot's prompts are in `Youmo_Sydneybot.py`, here is just for easy viewing, pl
 
 If you just want to chat with the bot yourself, please download [SydneyQt](https://github.com/juzeon/SydneyQt/) and run it on your machine, no need to deploy the bot specially.
 
-Deploying this bot does not require the use of other paid services except renting a server. The specific steps are as follows:
+Deploying the Sydney version's bot does not require the use of other paid services except if you want to rent a server.
+
+The specific steps are as follows:
 
 1. Install requirements:
 
@@ -108,7 +110,7 @@ Deploying this bot does not require the use of other paid services except rentin
 pip install -r requirements.txt
 ```
 
-2. if you choose to use Sydney as a core to engine the bot please Run this [file](./Youmo_Sydneybot.py)
+2. if you choose to use Sydney(Recommended) as a core to engine the bot please:
 
 <details>
 <summary>Follow this</summary>
@@ -122,9 +124,7 @@ pip install -r requirements.txt
 </details>
 
 
-
-
-3. if you choose to use ChatGPT as a core to engine the bot please Run this [file](./Youmo_gptbot.py)
+3. if you choose to use ChatGPT as a core to engine the bot please:
 
 <details>
 <summary>Follow this</summary>
