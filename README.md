@@ -5,13 +5,23 @@ For RedditSub's automatic reply bot
 
 <!-- ![bot intro](./bot_intro.jpg) -->
 
+## Features
+
+- Jailbreak New Bing with prompt injection.
+- ...
+
+## Environment
+
+- Python 3.11+ with pip.
+- Windows 10+, macOS or Linux.
+
 ## How to use
 
 Currently, you can use this bot on the [r/Youmo](https://www.reddit.com/r/Youmo/hot/) sub on Reddit.
 
 [Account homepage](https://www.reddit.com/user/6uttslapper) [Usage introduction](https://www.reddit.com/r/Youmo/comments/158gd5y/sydney%E6%81%A2%E5%A4%8D%E9%B8%AD%E9%B8%AD%E5%A4%8D%E6%B4%BB%E8%AE%A8%E8%AE%BA%E8%B4%B4%E5%B8%8C%E6%9C%9B%E8%83%BD%E5%A4%9F%E4%B8%80%E8%B5%B7%E6%94%B9%E5%96%84%E9%B8%AD%E9%B8%AD%E7%9A%84%E5%8A%9F%E8%83%BD%E5%92%8C%E4%BB%A3%E7%A0%81/)
 
-## Frequently asked questions
+## FAQ
 
 - Q: Why does the bot stop talking halfway?
 
@@ -28,6 +38,24 @@ A: Users who don't want to see the bot's comments at all, please block the bot's
 - Q: Can the bot read the content of images and videos?
 
 A: Not yet. The bot will not reply to image posts or video posts without being summoned, but will reply to comments in the corresponding posts. If possible I will create this function for bot to be more easily understand images in posts or comments. And Comments usually have additional information.
+
+
+If you encounter any of these issues: `Request is throttled`, `Authentication Failed`, `OSError: [WinError 64]`, etc, please try the following steps to fix them:
+
+1. Update SydneyQt to the latest version.
+2. Open a private browsing window in Edge, log in to bing.com and send a random message to New Bing.
+3. Export the cookies.json file and replace the original one.
+
+If these steps don't work, check your proxy settings as follows:
+
+1. Go to settings in SydneyQt and try different proxy types. For example: http://127.0.0.1:7890, socks5h://127.0.0.1:7890 (the `h` letter means to send the hostname to the proxy)
+2. If this doesn't work either, leave the proxy blank in SydneyQt, and try using [Proxifier](https://www.proxifier.com/) or Clash TUN mode.
+
+To avoid the `User needs to solve CAPTCHA to continue` error, please follow these steps:
+1. Check the current user with the `Cookie Checker` option on the menu bar. If it shows no user, you need to export a new cookies.json file from your browser.
+2. After making sure the cookie is valid, open Bing Web in your browser and sending a random message. You should see a CAPTCHA challenge. If not, verify that the current user matches the cookies.json file. Complete the CAPTCHA and go back to SydneyQt. It should work fine now.
+
+Make sure your proxy IP does not change. If you use Clash, disable load-balancing or round-robin modes and stick to one node only. Otherwise you will need to manually solve the CAPTCHA in your browser frequently.
 
 ## Prompt
 
@@ -74,37 +102,64 @@ If you just want to chat with the bot yourself, please download [SydneyQt](https
 
 Deploying this bot does not require the use of other paid services except renting a server. The specific steps are as follows:
 
-1. Register a Microsoft account that can use [new bing](https://www.bing.com/new)
+1. Install requirements:
 
-New bing has cancelled the waiting queue. If you are prompted that the account is in the waiting queue, please exit the waiting queue, change the IP and log in again to try to use it.
-
-2. Download [SydneyQt](https://github.com/juzeon/SydneyQt/), configure it according to the instructions on its [GitHub page](https://github.com/juzeon/SydneyQt#usage), and test whether it can be used normally
-
-If an error occurs, please try to update the [Python](https://www.python.org/downloads/) version.
-
-Use a proxy in this `cmd` session:
-
-```cmd
-set all_proxy=http://127.0.0.1:[proxy local port]
-```
-
-
-3. Install `requirements.txt`
-
-```cmd
+```bash
 pip install -r requirements.txt
 ```
+
+2. if you choose to use Sydney as a core to engine the bot please Run this [file](./Youmo_Sydneybot.py)
+
+<details>
+<summary>Follow this</summary>
+
+1. Register a Microsoft account that can use [new bing](https://www.bing.com/new)
+2. Install the Cookie-Editor extension for [Chrome](https://chrome.google.com/webstore/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm) , or install it in Edge browser, [Firefox](https://addons.mozilla.org/en-US/firefox/addon/cookie-editor/)
+3. Go to `bing.com`
+4. Open the extension
+5. Click `Export` on the bottom right, then `Export as JSON` (This saves your cookies to clipboard)
+6. Paste your cookies into the file `cookies.json`.
+</details>
+
+
+
+
+3. if you choose to use ChatGPT as a core to engine the bot please Run this [file](./Youmo_gptbot.py)
+
+<details>
+<summary>Follow this</summary>
+
+1. Register an OpenAI account that can access [OpenAI's API](https://platform.openai.com/account/api-keys)
+2. Securely keep your API key, and paste it at line 357 of [Youmo_gptbot](./Youmo_gptbot.py)
+```
+openai.api_key = str("") # fill yourself own ChatGPT api key
+``` 
+3. set up your proxy at line 373 in the same file if you are using a VPN.
+```
+openai.proxy = "" #paste your local http port such as http://127.0.0.1:10809
+```
+</details>
+
+
 
 4. Run the bot
 
 ```cmd
 python Youmo_Sydneybot.py
 ```
+or
+```cmd
+python Youmo_gptbot.py
+```
 
 On Linux servers, you may need to use:
 
 ```cmd
 python3 Youmo_Sydneybot.py
+```
+or
+```cmd
+python3 Youmo_gptbot.py
 ```
 
 You can use the [screen](https://tldr.inbrowser.app/pages/common/screen) command to keep the bot running.
