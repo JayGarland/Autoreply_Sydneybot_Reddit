@@ -5,7 +5,7 @@ For RedditSub's automatic reply bot
 
 ## Updates
 - Now Sydneybot can recognize image in a single post or comment, which makes the bot easier to understand what it is about. But cannot read post's image when bot replies comments below the post.
-![Image Recognition](./Image.jpg)
+[Image Recognition](./Image.jpg)
 
 ## Features
 
