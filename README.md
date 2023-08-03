@@ -181,3 +181,7 @@ You can use the [screen](https://tldr.inbrowser.app/pages/common/screen) command
 1. ~~wish to read images from user's post and comment~~ (Implemented) 
 2. make bot can generate content as well as Images
 3. improve bot's reply by adding former highlight replies to the system context in bot's prompt, so that it helps bot to generate replies with higher quality. 
+
+## Knowing issue
+- reply will be cut and incomplete when there is "回复" keyword while responding
+![issue](./issue.png)
