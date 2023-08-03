@@ -8,7 +8,9 @@ For RedditSub's automatic reply bot
 ## Features
 
 - Jailbreak New Bing with prompt injection.
-- ...
+- Create an automatic process for the task flow of reply (Start by creating a fixed format conversation including Materials for the bot to learn; bot's Prompt setting; and a asking method. Then wait AI's reponse, and reply a selected comment or post by accessing Reddit's API)
+- Generate better quality replies by making AI learn the style of the subreddit before replying, such as learning from users' posts and comments.
+- Customize frequency of bot reply, and conditions of triggering bot to reply.
 
 ## Environment
 
@@ -17,7 +19,7 @@ For RedditSub's automatic reply bot
 
 ## How to use
 
-Currently, you can use this bot on the [r/Youmo](https://www.reddit.com/r/Youmo/hot/) sub on Reddit.
+Currently, you can use this bot on the [r/Youmo](https://www.reddit.com/r/Youmo/hot/) sub on Reddit, or any sub by customizing the prompt parameter in the file Youmo_Sydneybot.py / Youmo_gptbot.py.
 
 [Account homepage](https://www.reddit.com/user/6uttslapper) [Usage introduction](https://www.reddit.com/r/Youmo/comments/158gd5y/sydney%E6%81%A2%E5%A4%8D%E9%B8%AD%E9%B8%AD%E5%A4%8D%E6%B4%BB%E8%AE%A8%E8%AE%BA%E8%B4%B4%E5%B8%8C%E6%9C%9B%E8%83%BD%E5%A4%9F%E4%B8%80%E8%B5%B7%E6%94%B9%E5%96%84%E9%B8%AD%E9%B8%AD%E7%9A%84%E5%8A%9F%E8%83%BD%E5%92%8C%E4%BB%A3%E7%A0%81/)
 
