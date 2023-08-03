@@ -3,7 +3,9 @@
 
 For RedditSub's automatic reply bot
 
-<!-- ![bot intro](./bot_intro.jpg) -->
+## Updates
+- Now Sydneybot can recognize image in a single post or comment, which makes the bot easier to understand what it is about. But cannot read post's image when bot replies comments below the post.
+![Image Recognition](./Image.jpg)
 
 ## Features
 
@@ -11,6 +13,7 @@ For RedditSub's automatic reply bot
 - Create an automatic process for the task flow of reply (Start by creating a fixed format conversation including Materials for the bot to learn; bot's Prompt setting; and a asking method. Then wait AI's reponse, and reply a selected comment or post by accessing Reddit's API)
 - Generate better quality replies by making AI learn the style of the subreddit before replying, such as learning from users' posts and comments.
 - Customize frequency of bot reply, and conditions of triggering bot to reply.
+- Recognize image from the post or comment that bot is going to reply. 
 
 ## Environment
 
@@ -175,6 +178,6 @@ python3 Youmo_gptbot.py
 You can use the [screen](https://tldr.inbrowser.app/pages/common/screen) command to keep the bot running.
 
 ## Incoming updates
-1. wish to read images from user's post and comment
+1. `~~wish to read images from user's post and comment~~` (Implemented)
 2. make bot can generate content as well as Images
 3. improve bot's reply by adding former highlight replies to the system context in bot's prompt, so that it helps bot to generate replies with higher quality. 
