@@ -15,6 +15,12 @@ For RedditSub's automatic reply bot
 - Customize frequency of bot reply, and conditions of triggering bot to reply.
 - Recognize image from the post or comment that bot is going to reply. 
 
+## ScreenShot
+<p align="center"><img src="./ScreenShot.jpg" width="360" height="640" border="5"></p>
+
+![Terminal](./terminal.jpg)
+
+
 ## Environment
 
 - Python 3.11+ with pip.
