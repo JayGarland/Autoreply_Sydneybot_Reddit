@@ -191,3 +191,7 @@ You can use the [screen](https://tldr.inbrowser.app/pages/common/screen) command
 ## Knowing issue
 - reply will be cut and incomplete when there is "回复" keyword while responding
 ![issue](./issue.png)
+
+## Credit
+- https://github.com/AutoReplySender/Youmo-SydneyBot
+- https://github.com/juzeon/SydneyQt
