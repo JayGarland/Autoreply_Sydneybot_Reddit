@@ -16,7 +16,7 @@ For RedditSub's automatic reply bot
 - Recognize image from the post or comment that bot is going to reply. 
 
 ## ScreenShot
-<p align="center"><img src="./ScreenShot.jpg" width="360" height="640" border="5"></p>
+<p align="center"><img src="./ScreenShot.jpg" width="290" height="640" border="5"></p>
 
 ![Terminal](./terminal.jpg)
 
