@@ -161,7 +161,7 @@ You can use the [screen](https://tldr.inbrowser.app/pages/common/screen) command
 4. make bot chat with users in direct message chatbox
 
 ## Knowing issue
-- reply will be cut and incomplete when there is "回复" keyword while responding
+- reply will be cut and incomplete when there is "reply" keyword while responding
 ![issue](./issue.png)
 
 ## Credit

@@ -210,7 +210,7 @@ def remove_bot_statement(reply: str) -> str:
 
 # Delete excess reply format
 def remove_extra_format(reply: str) -> str:
-    pattern = r'回复[^：]*：(.*)'
+    pattern = r'reply[^：]*：(.*)'
     result = re.search(pattern, reply, re.S)
     if result is None:
         return reply
@@ -495,7 +495,7 @@ async def sydney_reply(content, context, method="random"):
                                     if secresponse["type"] == 2:
                                         if secreply is not None:
                                             break
-                            if "回复" not in secreply:
+                            if "reply" not in secreply:
                                 reply = concat_reply(reply, secreply)
                             reply = remove_extra_format(reply)
                             break
