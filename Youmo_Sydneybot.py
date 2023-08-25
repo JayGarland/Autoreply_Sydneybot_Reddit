@@ -449,11 +449,6 @@ async def sydney_reply(content, context, method="random"):
                     if msg_type is None:                       
                         if message.get("contentOrigin") == "Apology": # Check if the message content origin is Apology, which means sydney failed to generate a reply 
                             failed = True                            
-                            # if replied and not second_time_replied:                                
-                            #     ask_string_extended = f"Continue from where you stopped."
-                            #     context_extended = f"{context}\n\n[assistant](#message)\n{reply}\n[user](#message)\n{ask_string_extended}"                                                     
-                            #     second_time_replied= True                               
-                            #     await sydney_reply(content, context_extended, method="random")
                             if not replied:
                                 reply = remove_extra_format(response["arguments"][0]["messages"][0]["adaptiveCards"][0]["body"][0]["text"])
                                 print("Failed reply =" + reply)
