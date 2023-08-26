@@ -359,7 +359,7 @@ async def sydney_reply(content, context, method="random"):
     else:
         # If the content is a comment, set the ask string to reply to the last comment
         # Also specify not to repeat or use parallelism in the reply
-        ask_string = f"Please reply to {sub_user_nickname} {content.author}'s last reply. Only output the content of your reply. Do not compare, do not repeat the content or format of the previous reply."
+        ask_string = f"Please reply to {sub_user_nickname} {content.author}'s last reply. Only output the content of your reply. Do not compare, do not repeat the content or format of the previous replies."
         if hasattr(content, 'url'):
             image_url = content.body_html
             visual_search_url = re.search(r'https?://\S+\.(jpg|png|gif)', image_url).group()
@@ -403,7 +403,7 @@ async def sydney_reply(content, context, method="random"):
 
         if type(content) != praw.models.reddit.submission.Submission:
                     if failed and not modified:
-                        ask_string = f"Please reply to the last reply. Only output the content of your reply. Do not compare, do not repeat the content or format of the previous reply."
+                        ask_string = f"Please reply to the last reply. Only output the content of your reply. Do not compare, do not repeat the content or format of the previous replies."
                         modified = True
                     if failed and modified:
                         ask_string = f"Please reply to the last reply. Only output the content of your reply."
