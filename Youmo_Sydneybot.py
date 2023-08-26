@@ -384,7 +384,6 @@ async def sydney_reply(content, context, method="random"):
         ask_string = f"请回复{sub_user_nickname} {content.author} 的最后一条评论。不必介绍你自己，只输出你回复的内容正文。不要排比，不要重复之前回复的内容或格式。"
         if '<img' in content.body_html:
             # Find the image source URL by parsing the html body
-            import re
             img_src = re.search(r'<img src="(.+?)"', content.body_html).group(1)
             visual_search_url = img_src
         elif hasattr(content.submission, 'url') and content.submission.url.endswith((".jpg", ".png", ".gif")):
