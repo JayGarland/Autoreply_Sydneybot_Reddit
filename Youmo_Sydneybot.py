@@ -387,6 +387,8 @@ async def sydney_reply(content, context, method="random"):
             import re
             img_src = re.search(r'<img src="(.+?)"', content.body_html).group(1)
             visual_search_url = img_src
+        elif hasattr(content.submission, 'url') and content.submission.url.endswith((".jpg", ".png", ".gif")):
+            visual_search_url = content.submission.url
         else:
             visual_search_url = None
         # ask_string = bleach.clean(ask_string).strip()
