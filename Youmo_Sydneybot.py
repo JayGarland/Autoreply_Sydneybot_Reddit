@@ -382,9 +382,11 @@ async def sydney_reply(content, context, method="random"):
         # If the content is a comment, set the ask string to reply to the last comment
         # Also specify not to repeat or use parallelism in the reply
         ask_string = f"请回复{sub_user_nickname} {content.author} 的最后一条评论。不必介绍你自己，只输出你回复的内容正文。不要排比，不要重复之前回复的内容或格式。"
-        if hasattr(content, 'url'):
-            image_url = content.body_html
-            visual_search_url = re.search(r'https?://\S+\.(jpg|png|gif)', image_url).group()
+        if '<img' in content.body_html:
+            # Find the image source URL by parsing the html body
+            import re
+            img_src = re.search(r'<img src="(.+?)"', content.body_html).group(1)
+            visual_search_url = img_src
         else:
             visual_search_url = None
         # ask_string = bleach.clean(ask_string).strip()
