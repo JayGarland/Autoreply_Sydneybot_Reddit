@@ -360,9 +360,12 @@ async def sydney_reply(content, context, method="random"):
         # If the content is a comment, set the ask string to reply to the last comment
         # Also specify not to repeat or use parallelism in the reply
         ask_string = f"Please reply to {sub_user_nickname} {content.author}'s last reply. Only output the content of your reply. Do not compare, do not repeat the content or format of the previous replies."
-        if hasattr(content, 'url'):
-            image_url = content.body_html
-            visual_search_url = re.search(r'https?://\S+\.(jpg|png|gif)', image_url).group()
+        if '<img' in content.body_html:
+            # Find the image source URL by parsing the html body
+            img_src = re.search(r'<img src="(.+?)"', content.body_html).group(1)
+            visual_search_url = img_src
+        elif hasattr(content.submission, 'url') and content.submission.url.endswith((".jpg", ".png", ".gif")):
+            visual_search_url = content.submission.url
         else:
             visual_search_url = None
         # ask_string = bleach.clean(ask_string).strip()
