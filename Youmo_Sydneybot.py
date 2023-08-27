@@ -527,6 +527,8 @@ async def sydney_reply(content, context, method="random"):
         if "CAPTCHA" in str(e):
             return
         reply = "Sorry, the main post or comment in this post will trigger the Bing filter. This reply is preset and is only used to remind that even if the bot is summoned, it cannot reply in this case."
+        if "edgeservices.bing.com:443" in str(e):
+            reply = "sorry, due to the host network issue, the conversation connection was abortted, please send your message again, thanks!"
         print("reply = " + reply)
         reply += bot_statement
         content.reply(reply)
