@@ -550,6 +550,8 @@ async def sydney_reply(content, context, method="random"):
         if "CAPTCHA" in str(e):
             return
         reply = "抱歉，本贴主贴或评论会触发必应过滤器。这条回复是预置的，仅用于提醒此情况下虽然召唤了bot也无法回复。"
+        if "edgeservices.bing.com:443" in str(e):
+            reply = "抱歉，因为主机端网络连接被中断，请重试！这条回复是预置的，仅用于提醒此情况下虽然召唤了bot也无法回复。"
         print("reply = " + reply)
         reply += bot_statement
         content.reply(reply)
