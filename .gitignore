@@ -1,3 +1,7 @@
 cookies.json
 struct.json
+
 replied.pkl
+replied.pkl.arc
+
+__pycache__/
