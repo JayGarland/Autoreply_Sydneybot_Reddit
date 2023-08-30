@@ -188,6 +188,7 @@ You can use the [screen](https://tldr.inbrowser.app/pages/common/screen) command
 2. make bot can generate content as well as Images
 3. improve bot's reply by adding former highlight replies to the system context in bot's prompt, so that it helps bot to generate replies with higher quality. 
 4. make bot chat with users in direct message chatbox
+5. add a process of streamlining its response if the response context is over a limit of words.
 
 ## Knowing issue
 - reply will be cut and incomplete when there is "回复" keyword while responding
