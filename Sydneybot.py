@@ -405,8 +405,12 @@ async def sydney_reply(content, context, method="random"):
         print(f"image: {visual_search_url}")
 
     ask_string = bleach.clean(ask_string).strip()
+
+    with open('config.json') as f:
+        address = json.load(f)
+
     # Set the proxy string to localhost
-    proxy = "http://127.0.0.1:10809"
+    proxy = address['proxy'] if address != "" else None
     failed = False # Initialize a failed flag to False
     modified = False # Initialize a modified flag to False
     
@@ -421,7 +425,7 @@ async def sydney_reply(content, context, method="random"):
             conversation=secconversation,
             prompt=ask_string_extended,
             context=context_extended,                                
-            proxy=proxy if proxy != "" else None,
+            proxy=proxy,
             # image_url=visual_search_url,              
             wss_url='wss://' + 'sydneybot.mamba579jpy.workers.dev' + '/sydney/ChatHub',
             # 'sydney.bing.com'
@@ -487,7 +491,7 @@ async def sydney_reply(content, context, method="random"):
                 conversation=conversation,
                 prompt=ask_string,
                 context=context,                                
-                proxy=proxy if proxy != "" else None,
+                proxy=proxy,
                 image_url=visual_search_url,
                 no_search=True,             
                 wss_url='wss://' + 'sydneybot.mamba579jpy.workers.dev' + '/sydney/ChatHub',
