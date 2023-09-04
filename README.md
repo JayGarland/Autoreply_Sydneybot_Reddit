@@ -4,7 +4,7 @@ RedditSub的自动回复机器人
 [English](README_en.md)
 
 ## 更新
-- 31/07/2023 r/Youmo sub 已被封禁, 更新机器人的提示设定, 机器人现已部署到r/langyou sub
+- 31/08/2023 r/Youmo sub 已被封禁, 更新机器人的提示设定, 机器人现已部署到r/langyou sub
 - 现在Sydneybot可以识别单个帖子或评论中的图片，这使得机器人更容易理解它是关于什么的。但是当机器人回复帖子下面的评论时，还不能读取帖子中的图片。
 <p align="center"><img src="./Image.jpg" width="360" height="640" border="5"></p>
 
