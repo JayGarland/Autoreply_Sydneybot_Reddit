@@ -146,10 +146,11 @@ pip install -r requirements.txt
     "bot_name": "", 
     "password" : "",
     "client_id" : "",
-    "client_secret" : ""
+    "client_secret" : "",
+    "proxy" : ""
 }
 ```    
-8. bot_name是reddit账号用户名，password是reddit账号密码，client_id是你创建的reddit应用的id， client_secret是该应用的secret.(关于如何申请reddit应用: google old.reddit-> preferances -> apps -> create application)
+8. bot_name是reddit账号用户名，password是reddit账号密码，client_id是你创建的reddit应用的id， client_secret是该应用的secret，proxy是你挂的软件代理的地址没有挂代理软件则不填.(关于如何申请reddit应用: google old.reddit-> preferances -> apps -> create application)
 </details>
 
 
