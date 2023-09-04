@@ -141,12 +141,13 @@ pip install -r requirements.txt
 5. 点击右下角的`Export`，然后点击`Export as JSON`（这会把你的cookies保存到剪贴板）
 6. 在项目的根目录中创建名叫“cookies”的json文件，把你的cookies粘贴到文件`cookies.json`中。
 7. 在项目的根目录中创建名叫“config”的json文件， 把相关内容按照下面的格式填好并粘贴到该文件中：
-```{
+```
+{
     "bot_name": "", 
     "password" : "",
     "client_id" : "",
     "client_secret" : ""
-    }
+}
 ```    
 8. bot_name是reddit账号用户名，password是reddit账号密码，client_id是你创建的reddit应用的id， client_secret是该应用的secret.(关于如何申请reddit应用: google old.reddit-> preferances -> apps -> create application)
 </details>
