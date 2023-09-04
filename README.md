@@ -29,9 +29,9 @@ RedditSub的自动回复机器人
 
 ## 如何使用
 
-目前，你可以在Reddit上的[r/Youmo](^1^)子版块使用这个机器人，或者通过自定义文件Youmo_Sydneybot.py / Youmo_gptbot.py中的提示参数在任何子版块使用。
+目前，你可以在Reddit上的[r/langyou](^1^)子版块查看这个机器人的动态，或者通过自定义文件Sydneybot.py / GPTbot.py中的提示参数在任何子版块使用。
 
-[账号主页](https://www.reddit.com/user/6uttslapper) [使用介绍](https://www.reddit.com/r/Youmo/comments/158gd5y/sydney%E6%81%A2%E5%A4%8D%E9%B8%AD%E9%B8%AD%E5%A4%8D%E6%B4%BB%E8%AE%A8%E8%AE%BA%E8%B4%B4%E5%B8%8C%E6%9C%9B%E8%83%BD%E5%A4%9F%E4%B8%80%E8%B5%B7%E6%94%B9%E5%96%84%E9%B8%AD%E9%B8%AD%E7%9A%84%E5%8A%9F%E8%83%BD%E5%92%8C%E4%BB%A3%E7%A0%81/)
+[账号主页](https://www.reddit.com/user/6uttslapper)
 
 ## FAQ
 
@@ -72,7 +72,7 @@ RedditSub的自动回复机器人
 
 请参考[第一页](./template/Prompts_Instructions.txt)和[第二页](./template/Prompts_Conversations.txt)的提示格式。
 
-机器人的提示在`Youmo_Sydneybot.py`中，这里只是为了方便查看，请参考代码:
+机器人的提示在`Sydneybot.py`中，这里只是为了方便查看，请参考代码:
 
 ```
 <|im_start|>system
@@ -149,7 +149,7 @@ pip install -r requirements.txt
 <summary>按照这个</summary>
 
 1. 注册一个可以访问[OpenAI's API](https://platform.openai.com/account/api-keys)的OpenAI账号
-2. 安全地保管你的API密钥，并把它粘贴到[Youmo_gptbot](./Youmo_gptbot.py)文件的api key中
+2. 安全地保管你的API密钥，并把它粘贴到[GPTbot](./GPTbot.py)文件的api key中
 ```
 openai.api_key = str("") # 填写自己的ChatGPT api密钥
 ``` 
@@ -164,21 +164,21 @@ openai.proxy = "" #粘贴你本地http端口，例如http://127.0.0.1:10809
 4. 运行机器人
 
 ```cmd
-python Youmo_Sydneybot.py
+python Sydneybot.py
 ```
 或者
 ```cmd
-python Youmo_gptbot.py
+python GPTbot.py
 ```
 
 在Linux服务器上，你可能需要使用：
 
 ```cmd
-python3 Youmo_Sydneybot.py
+python3 Sydneybot.py
 ```
 or
 ```cmd
-python3 Youmo_gptbot.py
+python3 GPTbot.py
 ```
 
 你可以使用 [screen](https://tldr.inbrowser.app/pages/common/screen) 命令来让机器人保持运行.
