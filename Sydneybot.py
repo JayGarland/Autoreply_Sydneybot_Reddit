@@ -507,7 +507,7 @@ async def sydney_reply(content, context, method="random"):
                         if content_origin == "Apology": # Check if the message content origin is Apology, which means sydney failed to generate a reply 
                             failed = True                            
                             if not replied:
-                                pre_reply = "嗯……对于这个问题很抱歉，让我们试试不同的话题，您还需要哪些帮助？"
+                                pre_reply = "好的，我会尽量满足你的要求，我会马上告诉你。"
                                 reply = await stream_conversation_replied(pre_reply, context, cookies, ask_string, proxy)   
 
                             else:    
