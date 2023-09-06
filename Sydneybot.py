@@ -26,8 +26,8 @@ client_secret = data['client_secret']  # api 密钥
 user_agent = "autoreply bot created by u/Chinese_Dictator."  # 这一项可以随意填写
 subreddit_name = ["bigpigTV", "hangkongmujian", "langyou", "antisocialism_sino", "iwanttorun", "realYoumo"]  # 在哪个 subreddit 运行
 
-min_char = 8  # 发言最少 10 个字才会被选中
-interval = 2  # 每隔 2 分钟执行一次检查
+min_char = 10  # 发言最少 10 个字才会被选中
+interval = 1  # 每隔 2 分钟执行一次检查
 submission_num = 15  # 每次请求最新的 15 个主贴
 comment_num = 30  # 每次随机触发时，请求最新的 30 条评论
 comment_rate = 0.5  # 每轮随机触发检查时，有 70% 的概率遍历评论尝试回复；其余情况仅遍历主贴
@@ -560,21 +560,27 @@ def task():
     init()
     print(subreddit)
     if subreddit == "bigpigTV":
+        bot_callname = "猪猪"
         bot_nickname = "猪猪"
         sub_user_nickname = "大猪"
     if subreddit == "hangkongmujian":
+        bot_callname = "兔兔"
         bot_nickname = "兔兔"
         sub_user_nickname = "兔友"
     if subreddit == "langyou":
-        bot_nickname = "鸭鸭|鴨鴨"
+        bot_callname = r'[鸭|鴨]{2}'
+        bot_nickname = "鸭鸭"
         sub_user_nickname = "浪友"
     if subreddit == "antisocialism_sino":
+        bot_callname = r'[鸭|鴨]{2}'
         bot_nickname = "鸭鸭"
         sub_user_nickname = "支友"
     if subreddit == "iwanttorun":
+        bot_callname = r'[鸭|鴨]{2}'
         bot_nickname = "鸭鸭"
         sub_user_nickname = "润友"
     if subreddit == "realYoumo":
+        bot_callname = r'[鸭|鴨]{2}'
         bot_nickname = "鸭鸭"
         sub_user_nickname = "真默友"
     if random_check_rate == 0:
@@ -594,13 +600,13 @@ def task():
     context_str = submission_list_to_context(submission_list, sub_user_nickname, subreddit)
     context_str += prompt.format(n = sub_user_nickname, k = bot_nickname, m= subreddit)
     if method == "at_me" or random.random() < comment_rate:
-        comment, ancestors = traverse_comments(comment_list=comment_list, method=method, bot_nickname=bot_nickname)
+        comment, ancestors = traverse_comments(comment_list=comment_list, method=method, bot_nickname=bot_callname)
         if comment is not None:
             context_str += build_comment_context(comment, ancestors, sub_user_nickname)
             asyncio.run(sydney_reply(comment, context_str, sub_user_nickname, bot_statement.format(k = bot_nickname)))
             # ignored_content.add(comment.replies[-1].id) 
     if comment is None:
-        submission = traverse_submissions(submission_list=submission_list, method=method, bot_nickname=bot_nickname)
+        submission = traverse_submissions(submission_list=submission_list, method=method, bot_nickname=bot_callname)
         if submission is not None:
             context_str += build_submission_context(submission, sub_user_nickname)
             asyncio.run(sydney_reply(submission, context_str, sub_user_nickname, bot_statement.format(k = bot_nickname)))
