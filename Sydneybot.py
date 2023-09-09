@@ -45,8 +45,8 @@ ignore_name_list = None
 
 blacklist = None  # 拉黑的是滥用本 bot 的用户。除非也想拉黑滥用本 bot 的用户，不建议照搬此名单
 
-bot_statement = "\n\n^*我是自动回复机器人流浪{k}，有疑问请[点此查看源代码](https://github.com/JayGarland/Autoreply_Sydneybot_Reddit)。*\n^*要和我对话请在发言中带上“{k}”。*"
-
+bot_statement = "\n\n^*我是自动回复机器人流浪{k}，有疑问请查看[源代码](https://github.com/JayGarland/Autoreply_Sydneybot_Reddit)。*\n^*欢迎[捐献给{k}](https://www.buymeacoffee.com/sh1tman)。*\n^*要和我对话请在发言中带上“{k}”。*"
+# 祝你有美好的一天!
 ignored_content = set()
 pickle_path = "./replied.pkl"
 archived_pickle_path = "./replied.pkl.arc"
@@ -413,7 +413,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement):
         address = json.load(f)
 
     # Set the proxy string to localhost
-    proxy = address['proxy'] if address != "" else None
+    proxy = address['proxy'] if address['proxy'] != "" else None
     failed = False # Initialize a failed flag to False
     modified = False # Initialize a modified flag to False
     
@@ -547,7 +547,9 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement):
     except Exception as e:
         print(e)
         reply = "抱歉，本贴主贴或评论会触发必应过滤器。这条回复是预置的，仅用于提醒此情况下虽然召唤了bot也无法回复。"
-        if "CAPTCHA" or "Connection" or "connection" or ":443" in str(e):
+        if "CAPTCHA" in str(e):
+            reply = "抱歉，此消息仅提醒主机端进行身份验证。"
+        if "Connection" or "connection" or ":443" in str(e):
             return
         print("reply = " + reply)
         reply += bot_statement
