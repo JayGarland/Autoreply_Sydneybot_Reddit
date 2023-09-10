@@ -45,7 +45,7 @@ ignore_name_list = None
 
 blacklist = None  # 拉黑的是滥用本 bot 的用户。除非也想拉黑滥用本 bot 的用户，不建议照搬此名单
 
-bot_statement = "\n\n^*我是自动回复机器人流浪{k}，有疑问请查看[源代码](https://github.com/JayGarland/Autoreply_Sydneybot_Reddit)。*\n^*欢迎[捐献给{k}](https://www.buymeacoffee.com/sh1tman)。*\n^*要和我对话请在发言中带上“{k}”。*"
+bot_statement = "\n\n^*我是自动回复机器人流浪{k}，有疑问请查看[源代码](https://github.com/JayGarland/Autoreply_Sydneybot_Reddit)。*\n^*欢迎[给{k}打赏](https://www.buymeacoffee.com/sh1tman)。*\n^*要和我对话请在发言中带上“{k}”。*"
 # 祝你有美好的一天!
 ignored_content = set()
 pickle_path = "./replied.pkl"
