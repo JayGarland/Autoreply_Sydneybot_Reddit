@@ -485,8 +485,9 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement):
             context=context_extended,                                
             proxy=proxy,
             # image_url=visual_search_url,              
-            wss_url='wss://' + 'sydneybot.mamba579jpy.workers.dev' + '/sydney/ChatHub',
+            wss_url='wss://' + 'sydney.bing.com' + '/sydney/ChatHub',
             # 'sydney.bing.com'
+            # sydneybot.mamba579jpy.workers.dev
             cookies=cookies
         )) as para:            
             async for secresponse in para:
@@ -552,8 +553,9 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement):
                 proxy=proxy,
                 image_url=visual_search_url,
                 no_search=True,             
-                wss_url='wss://' + 'sydneybot.mamba579jpy.workers.dev' + '/sydney/ChatHub',
+                wss_url='wss://' + 'sydney.bing.com' + '/sydney/ChatHub',
                 # 'sydney.bing.com'
+                # sydneybot.mamba579jpy.workers.dev
                 cookies=cookies)) as agen:            
             async for response in agen: # Iterate over the async generator of responses from sydney
                 # print(response) # Print each response for debugging                
@@ -568,11 +570,11 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement):
                                 pre_reply = "好的，我会尽量满足你的要求，我会马上告诉你。"
                                 reply = await stream_conversation_replied(pre_reply, context, cookies, ask_string, proxy)   
 
-                            else:    
-                                secreply = await stream_conversation_replied(reply, context, cookies, ask_string, proxy)
-                                if "回复" not in secreply:
-                                    reply = concat_reply(reply, secreply)
-                                reply = remove_extra_format(reply)  
+                            # else:    
+                            #     secreply = await stream_conversation_replied(reply, context, cookies, ask_string, proxy)
+                            #     if "回复" not in secreply:
+                            #         reply = concat_reply(reply, secreply)
+                            #     reply = remove_extra_format(reply)  
                             break
                         else:
                             replied = True
