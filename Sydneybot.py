@@ -24,9 +24,9 @@ client_id = data['client_id']  # api id
 client_secret = data['client_secret']  # api 密钥
 
 user_agent = "autoreply bot created by u/Chinese_Dictator."  # 这一项可以随意填写
-subreddit_name = ["bigpigTV", "hangkongmujian", "langyou", "iwanttorun", "realYoumo","real_China_irl"]  # 在哪个 subreddit 运行
+subreddit_name = ["bigpigTV", "hangkongmujian", "langyou", "iwanttorun", "realYoumo","real_China_irl","LiberalGooseGroup"]  # 在哪个 subreddit 运行
 
-# "antisocialism_sino",
+
 
 min_char = 10  # 发言最少 10 个字才会被选中
 interval = 1  # 每隔 2 分钟执行一次检查
@@ -37,8 +37,7 @@ random_check_rate = 5  # 每多少次检查进行一次随机触发检查。0 �
 
 removed_content_list = ["[removed]", "[deleted]", "[ Removed by Reddit ]"]
 blocked_content = "[unavailable]"
-# bot_nickname = r'[猪|鸭]{2}'
-# sub_user_nickname = None
+
 
 reddit = None
 subreddit = None
@@ -598,21 +597,21 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement):
             content.reply(reply)            
             return         
 
-
-    try:
-        await stream_o()      
-    except Exception as e:
-        print(e)
-        reply = "抱歉，本贴主贴或评论会触发必应过滤器。这条回复是预置的，仅用于提醒此情况下虽然召唤了bot也无法回复。"
-        if "Captcha" in str(e):
-            reply = "抱歉，此消息仅提醒主机端进行身份验证。"
-        elif "Connection" or "connection" or ":443" in str(e):
-            return
-        print("reply = " + reply)
-        reply += bot_statement
-        content.reply(reply)
-    else:
-        visual_search_url = None
+    for _ in range(4):
+        try:
+            await stream_o()      
+        except Exception as e:
+            print(e)
+            reply = "抱歉，本贴主贴或评论会触发必应过滤器。这条回复是预置的，仅用于提醒此情况下虽然召唤了bot也无法回复。"
+            if "Captcha" in str(e):
+                reply = "抱歉，此消息仅提醒主机端进行身份验证。"
+            elif "Connection" or "connection" or ":443" in str(e):
+                return
+            print("reply = " + reply)
+            reply += bot_statement
+            content.reply(reply)
+        else:
+            visual_search_url = None
      
         
 def task():
@@ -636,10 +635,10 @@ def task():
         bot_callname = r'[熊]{2}'
         bot_nickname = "熊熊"
         sub_user_nickname = "Real友"
-    # if subreddit == "antisocialism_sino":
-    #     bot_callname = r'[鸭|鴨]{2}'
-    #     bot_nickname = "鸭鸭"
-    #     sub_user_nickname = "支友"
+    if subreddit == "LiberalGooseGroup":
+        bot_callname = r'[鹅|鵝]{2}'
+        bot_nickname = "鹅鹅"
+        sub_user_nickname = "自由鹅"
     if subreddit == "iwanttorun":
         bot_callname = r'[鸭|鴨]{2}'
         bot_nickname = "鸭鸭"
