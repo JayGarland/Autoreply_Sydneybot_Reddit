@@ -605,6 +605,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement):
             reply = "抱歉，本贴主贴或评论会触发必应过滤器。这条回复是预置的，仅用于提醒此情况下虽然召唤了bot也无法回复。"
             if "Captcha" in str(e):
                 reply = "抱歉，此消息仅提醒主机端进行身份验证。"
+                return
             elif "Connection" or "connection" or ":443" in str(e):
                 return
             print("reply = " + reply)
