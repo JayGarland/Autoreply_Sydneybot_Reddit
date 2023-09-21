@@ -512,7 +512,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement):
         print(e)
         reply = "Sorry, the main post or comment in this post will trigger the Bing filter. This reply is preset and is only used to remind that even if the bot is summoned, it cannot reply in this case."
         if "Captcha" in str(e):
-            reply = "Sorry, this message is only used for reminding host to verify Captcha."
+            # reply = "Sorry, this message is only used for reminding host to verify Captcha."
             return
         elif "Connection" or "connection" or ":443" in str(e):
             return
