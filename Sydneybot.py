@@ -21,7 +21,7 @@ password = data['password']  # 账号密码
 client_id = data['client_id']  # api id
 client_secret = data['client_secret']  # api 密钥
 user_agent = "autoreply bot created by u/Chinese_Dictator."  # 这一项可以随意填写
-subreddit_name = ["2Asia4u","teenagers","greentext","China"]  # 在哪个 subreddit 运行
+subreddit_name = ["2Asia4u","teenagers","China"]  # 在哪个 subreddit 运行
 
 
 min_char = 10  # 发言最少 10 个字才会被选中
@@ -29,7 +29,7 @@ interval = 1  # 每隔 2 分钟执行一次检查
 submission_num = 15  # 每次请求最新的 15 个主贴
 comment_num = 30  # 每次随机触发时，请求最新的 30 条评论
 comment_rate = 0.5  # 每轮随机触发检查时，有 70% 的概率遍历评论尝试回复；其余情况仅遍历主贴
-random_check_rate = 5  # 每多少次检查进行一次随机触发检查。0 代表不进行随机触发检查。默认只检查有没有人召唤 bot
+random_check_rate = 7  # 每多少次检查进行一次随机触发检查。0 代表不进行随机触发检查。默认只检查有没有人召唤 bot
 removed_content_list = ["[removed]", "[deleted]", "[ Removed by Reddit ]"]
 blocked_content = "[unavailable]"
 
@@ -538,8 +538,6 @@ def task():
         sub_user_nickname = "Asian"
     if subreddit == "teenagers":
         sub_user_nickname = "teenager"
-    if subreddit == "greentext":
-        sub_user_nickname = "r/greentext's redditor"
     if random_check_rate == 0:
         method = "at_me"
     elif i % random_check_rate == 0:
