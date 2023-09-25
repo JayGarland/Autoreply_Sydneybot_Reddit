@@ -21,7 +21,7 @@ password = data['password']  # 账号密码
 client_id = data['client_id']  # api id
 client_secret = data['client_secret']  # api 密钥
 user_agent = "autoreply bot created by u/Chinese_Dictator."  # 这一项可以随意填写
-subreddit_name = ["2Asia4u","teenagers","China"]  # 在哪个 subreddit 运行
+subreddit_name = ["2Asia4u","teenagers"]  # 在哪个 subreddit 运行
 
 
 min_char = 10  # 发言最少 10 个字才会被选中
@@ -532,8 +532,6 @@ def task():
     print(subreddit)
     bot_callname = r'(duckling|Duckling)'
     bot_nickname = "Duckling"
-    if subreddit == "China":
-        sub_user_nickname = "r/China's redditor"
     if subreddit == "2Asia4u":
         sub_user_nickname = "Asian"
     if subreddit == "teenagers":
