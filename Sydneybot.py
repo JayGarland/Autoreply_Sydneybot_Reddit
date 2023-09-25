@@ -24,7 +24,7 @@ client_id = data['client_id']  # api id
 client_secret = data['client_secret']  # api 密钥
 
 user_agent = "autoreply bot created by u/Chinese_Dictator."  # 这一项可以随意填写
-subreddit_name = ["langyou", "iwanttorun", "realYoumo","real_China_irl","LiberalGooseGroup"]  # 在哪个 subreddit 运行
+subreddit_name = ["langyou", "iwanttorun", "realYoumo","LiberalGooseGroup"]  # 在哪个 subreddit 运行
 
 
 
@@ -630,10 +630,10 @@ def task():
         bot_callname = r'[鸭|鴨]{2}'
         bot_nickname = "鸭鸭"
         sub_user_nickname = "浪友"
-    if subreddit == "real_China_irl":
-        bot_callname = r'[熊]{2}'
-        bot_nickname = "熊熊"
-        sub_user_nickname = "Real友"
+    # if subreddit == "real_China_irl":
+    #     bot_callname = r'[熊]{2}'
+    #     bot_nickname = "熊熊"
+    #     sub_user_nickname = "Real友"
     if subreddit == "LiberalGooseGroup":
         bot_callname = r'[鹅|鵝]{2}'
         bot_nickname = "鹅鹅"
