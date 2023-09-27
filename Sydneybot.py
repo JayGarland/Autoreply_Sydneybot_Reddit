@@ -420,7 +420,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement):
                             return reply
                         else:
                             reply = ""                   
-                            reply +=  remove_extra_format(message["adaptiveCards"][0]["body"][0]["text"])
+                            reply = ''.join([remove_extra_format(message["adaptiveCards"][0]["body"][0]["text"]) for message in secresponse["arguments"][0]["messages"]])
                             if "suggestedResponses" in message:
                                 return reply
                 if secresponse["type"] == 2:
@@ -490,7 +490,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement):
                         else:
                             replied = True
                             reply = ""                   
-                            reply += remove_extra_format(message["adaptiveCards"][0]["body"][0]["text"])
+                            reply = ''.join([remove_extra_format(message["adaptiveCards"][0]["body"][0]["text"]) for message in response["arguments"][0]["messages"]])
                             if "suggestedResponses" in message:
                                 break
                       
