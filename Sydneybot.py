@@ -468,7 +468,7 @@ def traverse_submissions(submission_list, method, bot_nickname):
 
 
 
-async def sydney_reply(content, context, sub_user_nickname, bot_statement):
+async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nickname):
     # This function takes a Reddit content (submission or comment), a context string and a method string as arguments
     # It uses the sydney module to generate a reply for the content based on the context and the method
     # It returns None if there is an error or a CAPTCHA, otherwise it posts the reply to Reddit
@@ -516,11 +516,11 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement):
     failed = False # Initialize a failed flag to False
     modified = False # Initialize a modified flag to False
     
-    async def stream_conversation_replied(reply, context, cookies, ask_string, proxy):
+    async def stream_conversation_replied(reply, context, cookies, ask_string, proxy, bot_nickname):
         # reply = remove_extra_format(response["arguments"][0]["messages"][0]["adaptiveCards"][0]["body"][0]["text"])
         # print("Failed reply =" + reply)
         ask_string_extended = f"从你停下的地方继续, 只输出你回复内容的正文。"
-        context_extended = f"{context}\n\n[user](#message)\n{ask_string}\n[assistant](#message)\n{reply}"
+        context_extended = f"{context}\n\n[user](#message)\n{ask_string}\n[{bot_nickname}](#message)\n{reply}"
         print(context_extended)
         secconversation = await sydney.create_conversation(cookies=cookies, proxy=proxy)                               
         async with aclosing(sydney.ask_stream(
@@ -612,7 +612,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement):
                             failed = True                            
                             if not replied:
                                 pre_reply = "好的，我会尽量满足你的要求，我会马上告诉你。"
-                                reply = await stream_conversation_replied(pre_reply, context, cookies, ask_string, proxy)   
+                                reply = await stream_conversation_replied(pre_reply, context, cookies, ask_string, proxy, bot_nickname)   
 
                             # else:    
                             #     secreply = await stream_conversation_replied(reply, context, cookies, ask_string, proxy)
@@ -713,13 +713,13 @@ def task():
         comment, ancestors = traverse_comments(comment_list=comment_list, method=method, bot_nickname=bot_callname)
         if comment is not None:
             context_str += build_comment_context(comment, ancestors, sub_user_nickname)
-            asyncio.run(sydney_reply(comment, context_str, sub_user_nickname, bot_statement.format(k = bot_nickname)))
+            asyncio.run(sydney_reply(comment, context_str, sub_user_nickname, bot_statement.format(k = bot_nickname), bot_nickname))
             # ignored_content.add(comment.replies[-1].id) 
     if comment is None:
         submission = traverse_submissions(submission_list=submission_list, method=method, bot_nickname=bot_callname)
         if submission is not None:
             context_str += build_submission_context(submission, sub_user_nickname)
-            asyncio.run(sydney_reply(submission, context_str, sub_user_nickname, bot_statement.format(k = bot_nickname)))
+            asyncio.run(sydney_reply(submission, context_str, sub_user_nickname, bot_statement.format(k = bot_nickname), bot_nickname))
             # ignored_content.add(submission.replies[-1].id)
     print(f"本轮检查结束，方法是 {method}。")
     i += 1
