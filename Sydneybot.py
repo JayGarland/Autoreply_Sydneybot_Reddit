@@ -531,7 +531,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
             prompt=ask_string_extended,
             context=context_extended,                                
             proxy=proxy,
-            no_search=False,
+            # no_search=False,
             # image_url=visual_search_url,              
             wss_url='wss://' + 'sydney.bing.com' + '/sydney/ChatHub',
             # 'sydney.bing.com'
@@ -600,7 +600,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
                 context=context,                                
                 proxy=proxy,
                 image_url=visual_search_url,
-                no_search=False,             
+                # no_search=False,             
                 wss_url='wss://' + 'sydney.bing.com' + '/sydney/ChatHub',
                 # 'sydney.bing.com'
                 # sydneybot.mamba579jpy.workers.dev
