@@ -2,8 +2,7 @@
 An autoreply bot on Reddit powered by Sydney with customized settings
 
 ## Current deployed subReddits
-- r/2Asia4u
-- r/4chan
+~~- r/2Asia4u~~(currently banned)
 
 ## Updates
 - Now Sydneybot can recognize one single image from post or comment, which makes the bot easier to understand what it is about. If the post has no image, bot will check the image from replies.
