@@ -21,7 +21,7 @@ password = data['password']  # 账号密码
 client_id = data['client_id']  # api id
 client_secret = data['client_secret']  # api 密钥
 user_agent = "autoreply bot created by u/Chinese_Dictator."  # 这一项可以随意填写
-subreddit_name = ["2asians4u_irl", "AmItheAsshole", "tifu"]  # 在哪个 subreddit 运行
+subreddit_name = ["2asians4u_irl", "AmItheAsshole"]  # 在哪个 subreddit 运行
 
 
 min_char = 10  # 发言最少 10 个字才会被选中
@@ -614,8 +614,6 @@ def task():
     if subreddit == "AmItheAsshole":
         sub_user_nickname = "dude"
     
-    if subreddit == "tifu":
-        sub_user_nickname = "dude"
     if random_check_rate == 0:
         method = "at_me"
     elif i % random_check_rate == 0:
