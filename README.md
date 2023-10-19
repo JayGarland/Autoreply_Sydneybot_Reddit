@@ -168,21 +168,21 @@ openai.api_key = str("") # fill yourself own ChatGPT api key
 4. Run the bot
 
 ```cmd
-python _Sydneybot.py
+python Sydneybot.py
 ```
 or
 ```cmd
-python _gptbot.py
+python gptbot.py
 ```
 
 On Linux servers, you may need to use:
 
 ```cmd
-python3 _Sydneybot.py
+python3 Sydneybot.py
 ```
 or
 ```cmd
-python3 _gptbot.py
+python3 gptbot.py
 ```
 
 You can use the [screen](https://tldr.inbrowser.app/pages/common/screen) command to keep the bot running.
