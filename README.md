@@ -156,7 +156,7 @@ pip install -r requirements.txt
 <summary>Follow this</summary>
 
 1. Register an OpenAI account that can access [OpenAI's API](https://platform.openai.com/account/api-keys)
-2. Securely keep your API key, and paste it at line 357 of [_gptbot](./_gptbot.py)
+2. Securely keep your API key, and paste it at line 357 of [gptbot](./gptbot.py)
 ```
 openai.api_key = str("") # fill yourself own ChatGPT api key
 ``` 
