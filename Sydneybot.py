@@ -24,7 +24,7 @@ client_id = data['client_id']  # api id
 client_secret = data['client_secret']  # api 密钥
 
 user_agent = "autoreply bot created by u/Chinese_Dictator."  # 这一项可以随意填写
-subreddit_name = ["iwanttorun", "LiberalGooseGroup"]  # 在哪个 subreddit 运行
+subreddit_name = ["iwanttorun", "LiberalGooseGroup", "JunWuCiWeiMian"]  # 在哪个 subreddit 运行
 
 
 
@@ -458,7 +458,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
     async def stream_conversation_replied(reply, context, cookies, ask_string, proxy, bot_nickname):
         # reply = remove_extra_format(response["arguments"][0]["messages"][0]["adaptiveCards"][0]["body"][0]["text"])
         # print("Failed reply =" + reply)
-        ask_string_extended = f"从你停下的地方继续, 只输出你回复内容的正文。"
+        ask_string_extended = f"从你停下的地方继续回答,50字以内,只输出内容的正文。"
         context_extended = f"{context}\n\n[user](#message)\n{ask_string}\n[{bot_nickname}](#message)\n{reply}"
         print(context_extended)
         secconversation = await sydney.create_conversation(cookies=cookies, proxy=proxy)                               
@@ -550,7 +550,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
                         if content_origin == "Apology": # Check if the message content origin is Apology, which means sydney failed to generate a reply 
                             failed = True                            
                             if not replied:
-                                pre_reply = "好的，我会满足你的要求并且只回复100字以内的内容。"
+                                pre_reply = "好的,我会满足你的要求并且只回复50字以内的内容。"
                                 reply = await stream_conversation_replied(pre_reply, context, cookies, ask_string, proxy, bot_nickname)   
 
                             # else:    
@@ -610,7 +610,7 @@ def task():
     #     bot_callname = r'[猪|豬]{2}'
     #     bot_nickname = "猪猪"
     #     sub_user_nickname = "大猪"
-    if subreddit == "hangkongmujian":
+    if subreddit == "JunWuCiWeiMian":
         bot_callname = "兔兔"
         bot_nickname = "兔兔"
         sub_user_nickname = "兔友"
