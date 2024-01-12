@@ -529,7 +529,6 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
         logger.warning(e)
         return
     
-
     async def stream_o(): # This function is an async generator that streams the sydney responses for the given conversation, context and prompt
         nonlocal failed
         nonlocal conversation
@@ -602,13 +601,24 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
             content.reply(reply)            
             return         
 
-    for _ in range(4):
-        try:
-            await stream_o()      
-        except Exception as e:
-            logger.error(e)
-            # reply = "抱歉，本贴主贴或评论会触发必应过滤器。这条回复是预置的，仅用于提醒此情况下虽然召唤了bot也无法回复。"
-            return
+    try:
+        await stream_o()
+    except Exception as e:
+        logger.warning(e)
+        if ("closed", "connection", "Connection") in e:
+            await stream_o()
+        reply = "抱歉，本贴主贴或评论会触发必应过滤器。这条回复是预置的，仅用于提醒此情况下虽然召唤了bot也无法回复。"
+        reply += bot_statement
+        content.reply(reply)
+        return
+    
+    # for _ in range(4):
+    #     try:
+    #         await stream_o()      
+    #     except Exception as e:
+    #         logger.error(e)
+    #         # reply = "抱歉，本贴主贴或评论会触发必应过滤器。这条回复是预置的，仅用于提醒此情况下虽然召唤了bot也无法回复。"
+    #         return
             #commented out for a lazy exception handling, I used return to let it try again total 4 times
             # if "Captcha" in str(e):
             #     # reply = "抱歉，此消息仅提醒主机端进行身份验证。"
