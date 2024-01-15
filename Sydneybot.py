@@ -527,7 +527,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
         conversation = await sydney.create_conversation(cookies=cookies, proxy=proxy)
     except Exception as e:
         logger.warning(e)
-        return
+        conversation = await sydney.create_conversation(cookies=cookies, proxy=proxy)
     
     async def stream_o(): # This function is an async generator that streams the sydney responses for the given conversation, context and prompt
         nonlocal failed
