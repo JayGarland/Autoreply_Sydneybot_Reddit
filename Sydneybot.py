@@ -632,13 +632,13 @@ def task():
         comment, ancestors = traverse_comments(comment_list=comment_list, method=method, bot_nickname=bot_callname)
         if comment is not None:
             context_str += build_comment_context(comment, ancestors, sub_user_nickname)
-            asyncio.run(sydney_reply(comment, context_str, sub_user_nickname, bot_statement.format(k = bot_nickname)))
+            asyncio.run(sydney_reply(comment, context_str, sub_user_nickname, bot_statement.format(k = bot_nickname), bot_nickname))
             # ignored_content.add(comment.replies[-1].id) 
     if comment is None:
         submission = traverse_submissions(submission_list=submission_list, method=method, bot_nickname=bot_callname)
         if submission is not None:
             context_str += build_submission_context(submission, sub_user_nickname)
-            asyncio.run(sydney_reply(submission, context_str, sub_user_nickname, bot_statement.format(k = bot_nickname)))
+            asyncio.run(sydney_reply(submission, context_str, sub_user_nickname, bot_statement.format(k = bot_nickname), bot_nickname))
             # ignored_content.add(submission.replies[-1].id)
     logger.info(f"Check completed this pattern, method is {method}.")
     i += 1
