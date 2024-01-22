@@ -440,7 +440,8 @@ async def stream_conversation_replied(pre_reply, context, cookies, ask_string, p
             wss_url='wss://' + 'sydney.bing.com' + '/sydney/ChatHub',
             # 'sydney.bing.com'
             # sydneybot.mamba579jpy.workers.dev
-            cookies=cookies
+            cookies=cookies,
+            no_search= False
         )) as para:            
             async for secresponse in para:
                 if secresponse["type"] == 1 and "messages" in secresponse["arguments"][0]:
@@ -555,7 +556,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
                 context=context,                                
                 proxy=proxy,
                 image_url=visual_search_url,
-                no_search=True,             
+                no_search=False,             
                 wss_url='wss://' + 'sydney.bing.com' + '/sydney/ChatHub',
                 # 'sydney.bing.com'
                 # sydneybot.mamba579jpy.workers.dev
