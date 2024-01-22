@@ -471,9 +471,9 @@ async def stream_conversation_replied(pre_reply, context, cookies, ask_string, p
     
 
 async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nickname):
-    # This function takes a Reddit content (submission or comment), a context string and a method string as arguments
-    # It uses the sydney module to generate a reply for the content based on the context and the method
-    # It returns None if there is an error or a CAPTCHA, otherwise it posts the reply to Reddit
+    """This function takes a Reddit content (submission or comment), a context string and a method string as arguments.\n
+    It uses the sydney module to generate a reply for the content based on the context and the method.\n
+    It returns if there is an error or a CAPTCHA, otherwise it posts the reply to Reddit"""
 
     # Clean the context string using bleach
     context = bleach.clean(context).strip()
@@ -530,7 +530,8 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
         logger.warning(e)
         conversation = await sydney.create_conversation(cookies=cookies, proxy=proxy)
     
-    async def stream_o(): # This function is an async generator that streams the sydney responses for the given conversation, context and prompt
+    async def stream_o(): 
+        """This function is an async generator that streams the sydney responses for the given conversation, context and prompt."""
         nonlocal failed
         nonlocal conversation
         nonlocal modified
