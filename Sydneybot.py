@@ -607,7 +607,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
         await stream_o()
     except Exception as e:
         logger.warning(e)
-        if ("closed", "connection", "Connection") in e:
+        if ("closed", "connection", "Connection") in str(e):
             await stream_o()
         reply = "抱歉，本贴主贴或评论会触发必应过滤器。这条回复是预置的，仅用于提醒此情况下虽然召唤了bot也无法回复。"
         reply += bot_statement
