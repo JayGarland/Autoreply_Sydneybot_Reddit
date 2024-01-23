@@ -349,7 +349,7 @@ def build_comment_context(comment, ancestors, sub_user_nickname):
     for comment in top_comments:
         context_str += comment.body + "(" + str(comment.score) + "upvotes)" + "\n"
     context_str += "\n"
-    context_str += f"[system][#additional_instructions]\nWhen replying, do not reply to the post itself, but to the last reply of {sub_user_nickname} {comment.author}: {ancestor.body}. When replying, do not repeat or imitate what the {sub_user_nickname} you are replying to said. Needn't introduce yourself. Only output the body of your reply. Do not attach the original text, do not output all possible replies."
+    context_str += f"[system][#additional_instructions]\nWhen replying, do not repeat or imitate what the {sub_user_nickname} you are replying to said. Needn't introduce yourself. Only output the body of your reply. Do not attach the original text, do not output all possible replies, do not reply to the post itself, but to the last reply of {sub_user_nickname} {comment.author}: {ancestor.body}. "
     return context_str
 
 def traverse_comments(comment_list, method, bot_nickname):
