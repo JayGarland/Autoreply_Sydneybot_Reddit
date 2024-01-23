@@ -19,27 +19,22 @@ _DEBUG = False
 _PROXY = urllib.request.getproxies().get("https")
 
 _BASE_OPTION_SETS = [
-    "fluxcopilot",
-    "nojbf",
+    "flux_365_copilot",
+    "deepleo_harmony_365_copilot",
     "iyxapbing",
     "iycapbing",
     "dgencontentv3",
     "nointernalsugg",
+    "nojbf",
     "disable_telemetry",
     "machine_affinity",
     "streamf",
-    "codeint",
-    "langdtwb",
-    "fdwtlst",
-    "fluxprod",
-    "eredirecturl",
-    "deuct3",
 ]
 
 
 class _OptionSets(Enum):
-    CREATIVE = _BASE_OPTION_SETS
-    CREATIVECLASSIC = _BASE_OPTION_SETS
+    GPT4TURBO = _BASE_OPTION_SETS + ["dlgpt4t", "fluxsydney"] #todo gpt4turbo returns a {"type":3,"invocationId":"0","error":"Failed to invoke 'Chat' due to an error on the server."}
+    CREATIVE = _BASE_OPTION_SETS + ["soedgeca"]
     BALANCED = _BASE_OPTION_SETS + ["galileo"]
     PRECISE = _BASE_OPTION_SETS + ["h3precise"]
 
@@ -335,11 +330,11 @@ async def ask_stream(
                 'arguments': [
                     {
                         'optionsSets': option_sets,
-                        'source': 'cib-ccp',
+                        'source': 'edge_coauthor_prod',
                         'allowedMessageTypes': _ALLOWED_MESSAGE_TYPES,
                         'sliceIds': _SLICE_IDS,
                         "verbosity": "verbose",
-                        "scenario": "SERP",
+                        "scenario": "Underside",
                         'traceId': os.urandom(16).hex(),
                         'requestId': message_id,
                         'isStartOfSession': True,
@@ -351,7 +346,7 @@ async def ask_stream(
                             "author": "user",
                             "inputMethod": "Keyboard",
                             "text": prompt,
-                            "messageType": random.choice(["Chat", "CurrentWebpageContextRequest"]),
+                            "messageType": random.choice(["Chat", "SearchQuery","CurrentWebpageContextRequest"]),
                             "requestId": message_id,
                             "messageId": message_id,
                             "imageUrl": image_url or None,
