@@ -347,7 +347,7 @@ def build_comment_context(comment, ancestors, sub_user_nickname):
             else:
                 context_str += f"{sub_user_nickname} {ancestor.author} 评论 {replied_to_author} 的回复说“{ancestor.body}”\n"
         replied_to_author = ancestor.author
-    context_str += "\n"
+    context_str += "\n\n"
     context_str += f"在此帖子下还有一些其他{sub_user_nickname}评论：\n" 
     submission.comment_sort= "top"
     top_comments = submission.comments.list()[:3]
@@ -607,7 +607,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
         await stream_o()
     except Exception as e:
         logger.warning(e)
-        if ("closed", "connection", "Connection") in str(e):
+        if "closed" in str(e) or "connection" in str(e) or "Connection" in str(e):
             await stream_o()
         reply = "抱歉，本贴主贴或评论会触发必应过滤器。这条回复是预置的，仅用于提醒此情况下虽然召唤了bot也无法回复。"
         reply += bot_statement
