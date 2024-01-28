@@ -319,7 +319,7 @@ def concat_reply(former_str: str, latter_str: str) -> str:
             return former_str + latter_str[i:]
     return former_str + latter_str
 
-def build_comment_context(comment, ancestors, sub_user_nickname):
+def build_comment_context(comment, ancestors, sub_user_nickname, bot_nickname, bot_name):
     submission = reddit.submission(comment.link_id[3:])
     context_str = f'[system](#context)\nThe following is the post posted by {sub_user_nickname} {submission.author}.\n'
     context_str += f"The post title is \"{submission.title}\""
@@ -334,11 +334,19 @@ def build_comment_context(comment, ancestors, sub_user_nickname):
             first_comment = False
             if ancestor.author in bot_name_list:
                 context_str += f"{sub_user_nickname} {ancestor.author} replied to {replied_to_author}'s post saying \"{remove_bot_statement(ancestor.body)}\"\n"
+                if ancestor.author == bot_name:
+                    context_str += f"{bot_nickname} replied to {replied_to_author}'s post saying \"{remove_bot_statement(ancestor.body)}\"\n"
+            if replied_to_author == bot_name:
+                context_str += f"{sub_user_nickname} {ancestor.author} replied to {bot_nickname}'s post saying \"{ancestor.body}\"\n"
             else:
                 context_str += f"{sub_user_nickname} {ancestor.author} replied to {replied_to_author}'s post saying \"{ancestor.body}\"\n"
         else:
             if ancestor.author in bot_name_list:
                 context_str += f"{sub_user_nickname} {ancestor.author} replied to {replied_to_author}'s reply saying \"{remove_bot_statement(ancestor.body)}\"\n"
+                if ancestor.author == bot_name:
+                    context_str += f"{bot_nickname} replied to {replied_to_author}'s reply saying \"{remove_bot_statement(ancestor.body)}\"\n"
+            if replied_to_author == bot_name:
+                context_str += f"{sub_user_nickname} {ancestor.author} replied to {bot_name}'s reply saying \"{ancestor.body}\"\n"
             else:
                 context_str += f"{sub_user_nickname} {ancestor.author} replied to {replied_to_author}'s reply saying \"{ancestor.body}\"\n"
         replied_to_author = ancestor.author
@@ -562,7 +570,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
                                 reply = await stream_conversation_replied(pre_reply, context, cookies, ask_string, proxy, bot_nickname, visual_search_url)   
 
                             # else:    
-                            #     secreply = await stream_conversation_replied(reply, context, cookies, ask_string, proxy)
+                            #     secreply = await stream_conversation_replied(reply, context, cookies, ask_string, proxy, bot_nickname, visual_search_url)
                             #     if "回复" not in secreply:
                             #         reply = concat_reply(reply, secreply)
                             #     reply = remove_extra_format(reply)  
@@ -594,8 +602,11 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
         await stream_o()
     except Exception as e:
         logger.warning(e)
-        if "closed" in str(e) or "connection" in str(e) or "Connection" in str(e):
+        if "closed" in str(e) or "connection" in str(e) or "443" in str(e) or "Connection" in str(e):
             await stream_o()
+        if "CAPTCHA" in str(e):
+            # reply = "Sorry, please help me contact my developer, something needs vertification."
+            return
         reply = "Sorry, the main post or comment in this post will trigger the Bing filter. This reply is preset and is only used to remind that even if the bot is summoned, it cannot reply in this case."
         reply += bot_statement
         content.reply(reply)
@@ -634,7 +645,7 @@ def task():
     if method == "at_me" or random.random() < comment_rate:
         comment, ancestors = traverse_comments(comment_list=comment_list, method=method, bot_nickname=bot_callname)
         if comment is not None:
-            context_str += build_comment_context(comment, ancestors, sub_user_nickname)
+            context_str += build_comment_context(comment, ancestors, sub_user_nickname, bot_nickname, bot_name)
             asyncio.run(sydney_reply(comment, context_str, sub_user_nickname, bot_statement.format(k = bot_nickname), bot_nickname))
             # ignored_content.add(comment.replies[-1].id) 
     if comment is None:
