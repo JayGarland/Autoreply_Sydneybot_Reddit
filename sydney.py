@@ -19,16 +19,21 @@ _DEBUG = False
 _PROXY = urllib.request.getproxies().get("https")
 
 _BASE_OPTION_SETS = [
-    "flux_365_copilot",
-    "deepleo_harmony_365_copilot",
+    "fluxcopilot",
+    "nojbf",
     "iyxapbing",
     "iycapbing",
     "dgencontentv3",
     "nointernalsugg",
-    "nojbf",
     "disable_telemetry",
     "machine_affinity",
     "streamf",
+    "codeint",
+    "langdtwb",
+    "fdwtlst",
+    "fluxprod",
+    "eredirecturl",
+    "deuct3",
 ]
 
 
