@@ -34,12 +34,15 @@ _BASE_OPTION_SETS = [
     "fluxprod",
     "eredirecturl",
     "deuct3",
+    # may related to image search
+    "gptvnodesc",
+    "gptvnoex",
 ]
 
 
 class _OptionSets(Enum):
-    GPT4TURBO = _BASE_OPTION_SETS + ["dlgpt4t", "fluxsydney"] #todo gpt4turbo returns a {"type":3,"invocationId":"0","error":"Failed to invoke 'Chat' due to an error on the server."}
-    CREATIVE = _BASE_OPTION_SETS + ["soedgeca"]
+    CREATIVE = _BASE_OPTION_SETS + ["h3imaginative"]
+    CREATIVECLASSIC = _BASE_OPTION_SETS + ["h3imaginative"]
     BALANCED = _BASE_OPTION_SETS + ["galileo"]
     PRECISE = _BASE_OPTION_SETS + ["h3precise"]
 
@@ -329,17 +332,17 @@ async def ask_stream(
             await wss.send_str(_format({"type": 6}))
             option_sets = getattr(_OptionSets, conversation_style.upper()).value.copy()
             if no_search:
-                prompt = prompt + ' #no_search'
+                option_sets += 'nosearchall'
 
             struct = {
                 'arguments': [
                     {
                         'optionsSets': option_sets,
-                        'source': 'edge_coauthor_prod',
+                        'source': 'cib-ccp',
                         'allowedMessageTypes': _ALLOWED_MESSAGE_TYPES,
                         'sliceIds': _SLICE_IDS,
                         "verbosity": "verbose",
-                        "scenario": "Underside",
+                        "scenario": "SERP",
                         'traceId': os.urandom(16).hex(),
                         'requestId': message_id,
                         'isStartOfSession': True,
@@ -351,7 +354,7 @@ async def ask_stream(
                             "author": "user",
                             "inputMethod": "Keyboard",
                             "text": prompt,
-                            "messageType": random.choice(["Chat", "SearchQuery","CurrentWebpageContextRequest"]),
+                            "messageType": random.choice(["Chat", "SearchQuery", "CurrentWebpageContextRequest"]),
                             "requestId": message_id,
                             "messageId": message_id,
                             "imageUrl": image_url or None,
@@ -371,7 +374,8 @@ async def ask_stream(
                                 "messageType": "Context",
                                 # "messageId": "discover-web--page-ping-mriduna-----",
                             },
-                        ]
+                        ],
+                        'gptId': "copilot",
                     }
                 ],
                 'invocationId': '0',
