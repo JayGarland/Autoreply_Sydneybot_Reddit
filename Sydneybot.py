@@ -340,18 +340,18 @@ def build_comment_context(comment, ancestors, sub_user_nickname, bot_nickname, b
             if ancestor.author in bot_name_list:
                 context_str += f"{sub_user_nickname} {ancestor.author} 评论 {replied_to_author} 的帖子说“{remove_bot_statement(ancestor.body)}”\n"
                 if ancestor.author == bot_name:
-                    context_str += f"{bot_nickname} 评论 {replied_to_author} 的帖子说“{remove_bot_statement(ancestor.body)}”\n"
+                    context_str += f"{bot_nickname} 评论 {sub_user_nickname} {replied_to_author} 的帖子说“{remove_bot_statement(ancestor.body)}”\n"
             if replied_to_author == bot_name:
-                context_str += f"{sub_user_nickname} 评论 {bot_nickname} 的帖子说“{ancestor.body}”\n"
+                context_str += f"{sub_user_nickname} {ancestor.author} 评论 {bot_nickname} 的帖子说“{ancestor.body}”\n"
             else:
                 context_str += f"{sub_user_nickname} {ancestor.author} 评论 {replied_to_author} 的帖子说“{ancestor.body}”\n"
         else:
             if ancestor.author in bot_name_list:
                 context_str += f"{sub_user_nickname} {ancestor.author} 评论 {replied_to_author} 的回复说“{remove_bot_statement(ancestor.body)}”\n"
                 if ancestor.author == bot_name:
-                    context_str += f"{bot_nickname} 评论 {replied_to_author} 的回复说“{remove_bot_statement(ancestor.body)}”\n"
+                    context_str += f"{bot_nickname} 评论 {sub_user_nickname} {replied_to_author} 的回复说“{remove_bot_statement(ancestor.body)}”\n"
             if replied_to_author == bot_name:
-                context_str += f"{sub_user_nickname} 评论 {bot_nickname} 的回复说“{ancestor.body}”\n"
+                context_str += f"{sub_user_nickname} {ancestor.author} 评论 {bot_nickname} 的回复说“{ancestor.body}”\n"
             else:
                 context_str += f"{sub_user_nickname} {ancestor.author} 评论 {replied_to_author} 的回复说“{ancestor.body}”\n"
         replied_to_author = ancestor.author
