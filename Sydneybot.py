@@ -448,6 +448,26 @@ def traverse_submissions(submission_list, method, bot_nickname):
         return submission
     return None
 
+def detect_chinese_char_pair(context, threshold=5):
+    # create a dictionary to store the frequency of each pair of consecutive chinese characters
+    freq = {}
+    # loop through the context with a sliding window of size 2
+    for i in range(len(context) - 1):
+        # get the current pair of characters
+        pair = context[i:i+2]
+        # check if both characters are chinese characters using the unicode range
+        if '\u4e00' <= pair[0] <= '\u9fff' and '\u4e00' <= pair[1] <= '\u9fff':
+            # increment the frequency of the pair or set it to 1 if not seen before
+            freq[pair] = freq.get(pair, 0) + 1
+    # loop through the frequency dictionary
+    for pair, count in freq.items():
+        # check if the count is greater than or equal to the threshold
+        if count >= threshold:
+            # return True and the pair
+            return True, pair
+    # return False and None if no pair meets the threshold
+    return False, None
+
 
 async def stream_conversation_replied(pre_reply, context, cookies, ask_string, proxy, bot_nickname, visual_search_url):
         secconversation = await sydney.create_conversation(cookies=cookies, proxy=proxy)  
@@ -495,10 +515,14 @@ async def stream_conversation_replied(pre_reply, context, cookies, ask_string, p
     
     
 
-async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nickname):
+async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nickname, retry_count = 0):
     """This function takes a Reddit content (submission or comment), a context string and a method string as arguments.\n
     It uses the sydney module to generate a reply for the content based on the context and the method.\n
     It returns if there is an error or a CAPTCHA, otherwise it posts the reply to Reddit"""
+
+    if retry_count > 2:
+        logger.warn("Failed after maximum number of retry times")
+        return
 
     # Clean the context string using bleach
     context = bleach.clean(context).strip()
@@ -512,10 +536,6 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
             visual_search_url = content.url
         else:
             visual_search_url = None
-        # ask_string = bleach.clean(ask_string).strip()
-        logger.info(f"context: {context}")
-        logger.info(f"ask_string: {ask_string}")
-        logger.info(f"image: {visual_search_url}")
     else:
         # If the content is a comment, set the ask string to reply to the last comment
         # Also specify not to repeat or use parallelism in the reply
@@ -528,12 +548,13 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
             visual_search_url = content.submission.url
         else:
             visual_search_url = None
-        # ask_string = bleach.clean(ask_string).strip()
-        logger.info(f"context: {context}")
-        logger.info(f"ask_string: {ask_string}")
-        logger.info(f"image: {visual_search_url}")
 
     ask_string = bleach.clean(ask_string).strip()
+    logger.info(f"context: {context}")
+    logger.info(f"ask_string: {ask_string}")
+    logger.info(f"image: {visual_search_url}")
+
+    
 
     with open('config.json') as f:
         address = json.load(f)
@@ -555,17 +576,18 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
         logger.warning(e)
         conversation = await sydney.create_conversation(cookies=cookies, proxy=proxy)
     
-    async def stream_o(): 
-        """This function is an async generator that streams the sydney responses for the given conversation, context and prompt."""
-        nonlocal failed
-        nonlocal conversation
-        nonlocal modified
-        nonlocal context
-        nonlocal ask_string
-        nonlocal content
-        nonlocal cookies
-        nonlocal proxy
-        nonlocal visual_search_url
+    # async def stream_o(): 
+    #     """This function is an async generator that streams the sydney responses for the given conversation, context and prompt."""
+    #     nonlocal failed
+    #     nonlocal conversation
+    #     nonlocal modified
+    #     nonlocal context
+    #     nonlocal ask_string
+    #     nonlocal content
+    #     nonlocal cookies
+    #     nonlocal proxy
+    #     nonlocal visual_search_url
+    try:
         replied = False
 
         if type(content) != praw.models.reddit.submission.Submission:
@@ -603,12 +625,21 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
                             #     secreply = await stream_conversation_replied(reply, context, cookies, ask_string, proxy)
                             #     if "回复" not in secreply:
                             #         reply = concat_reply(reply, secreply)
-                            #     reply = remove_extra_format(reply)  
+                            #     reply = remove_extra_format(reply)
+                            result, pair = detect_chinese_char_pair(reply, 10)
+                            if result:
+                                logger.info(f"a pair of consective characters detected over 10 times. It is {pair}")
+                                reply = await sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nickname)
                             break
                         else:
                             replied = True
                             reply = ""                   
                             reply = ''.join([remove_extra_format(message["text"]) for message in response["arguments"][0]["messages"]])
+                            result, pair = detect_chinese_char_pair(reply, 10)
+                            if result:
+                                logger.info(f"a pair of consective characters detected over 10 times. It is {pair}")
+                                reply = await sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nickname)
+                                break
                             if "suggestedResponses" in message:
                                 visual_search_url = None
                                 break
@@ -628,12 +659,10 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
             content.reply(reply)            
             return         
 
-    try:
-        await stream_o()
     except Exception as e:
         logger.warning(e)
         if "closed" in str(e) or "connection" in str(e) or "Connection" in str(e) or "443" in str(e):
-            await stream_o()
+            await sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nickname, retry_count + 1)
         if "CAPTCHA" in str(e):
             return
         reply = "抱歉，本贴主贴或评论会触发必应过滤器。这条回复是预置的，仅用于提醒此情况下虽然召唤了bot也无法回复。"
