@@ -48,7 +48,6 @@ ignore_name_list = None
 blacklist = None  # 拉黑的是滥用本 bot 的用户。除非也想拉黑滥用本 bot 的用户，不建议照搬此名单
 
 bot_statement = "\n\n^*我是自动回复机器人流浪{k}，有疑问请查看[源代码](https://github.com/JayGarland/Autoreply_Sydneybot_Reddit)。*\n^*欢迎[给{k}打赏](https://www.buymeacoffee.com/sh1tman)。*\n^*要和我对话请在发言中带上“{k}”。*"
-# 祝你有美好的一天!
 ignored_content = set()
 pickle_path = "./replied.pkl"
 archived_pickle_path = "./replied.pkl.arc"
@@ -165,6 +164,13 @@ input:
 # - 你想和{n}聊一些有趣的话题，比如音乐，电影，游戏，梗等等。
 # - 你想用轻松，幽默，创造性的语气和风格和{n}交流。
 # - 你想得到{n}的认可，赞美，同情或者友谊。
+
+with open('config.json') as f:
+    config = json.load(f)
+
+file_path = os.path.relpath("./cookies.json")
+cookies = json.loads(open(file_path, encoding="utf-8").read())
+
 def init():
     global reddit
     global subreddit
@@ -172,20 +178,24 @@ def init():
     global bot_name_list
     global ignore_name_list
     global blacklist
+    global config
+    global cookies
     reddit = praw.Reddit(client_id=client_id, client_secret=client_secret, password=password, user_agent=user_agent, username=bot_name)
     random_subReddit = random.choice(subreddit_name)
     subreddit = reddit.subreddit(random_subReddit)
 
     # 读取 bot 列表和忽略名单用户
-    submission = reddit.submission("15co551")
-    result = json.loads("\n".join(submission.selftext.split("\n")[1:-1]))
-    bot_name_list = result["bot_account"]
-    ignore_name_list = result["blocked_account"]
+    # replaced the method getting bots and users in lists with loading local lists
+    # submission = reddit.submission("15co551") 
+    # result = json.loads("\n".join(submission.selftext.split("\n")[1:-1]))
+    bot_name_list = config["bot_account"]
+    ignore_name_list = config["blocked_account"]
 
     # 读取黑名单用户
-    comment = reddit.comment("jtx7h0f")
-    result = json.loads("\n".join(comment.body.split("\n")[1:-1]))
-    blacklist = result["blacklist"]
+    # replaced the method getting blacklist with loading local list
+    # comment = reddit.comment("jtx7h0f")
+    # result = json.loads("\n".join(comment.body.split("\n")[1:-1]))
+    blacklist = config["blacklist"]
 
     if os.path.exists(pickle_path):
         with open(pickle_path, "rb") as pkl:
@@ -469,7 +479,7 @@ def detect_chinese_char_pair(context, threshold=5):
     return False, None
 
 
-async def stream_conversation_replied(pre_reply, context, cookies, ask_string, proxy, bot_nickname, visual_search_url):
+async def stream_conversation_replied(pre_reply, context, ask_string, proxy, bot_nickname, visual_search_url):
         secconversation = await sydney.create_conversation(cookies=cookies, proxy=proxy)  
 
         ask_string_extended = f"从你停下的地方继续回答,50字以内,只输出内容的正文。"
@@ -519,7 +529,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
     """This function takes a Reddit content (submission or comment), a context string and a method string as arguments.\n
     It uses the sydney module to generate a reply for the content based on the context and the method.\n
     It returns if there is an error or a CAPTCHA, otherwise it posts the reply to Reddit"""
-
+    
     if retry_count > 2:
         logger.warn("Failed after maximum number of retry times")
         return
@@ -554,23 +564,12 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
     logger.info(f"ask_string: {ask_string}")
     logger.info(f"image: {visual_search_url}")
 
-    
-
-    with open('config.json') as f:
-        address = json.load(f)
-
     # Set the proxy string to localhost
-    proxy = address['proxy'] if address['proxy'] != "" else None
+    proxy = config['proxy'] if config['proxy'] != "" else None
     failed = False # Initialize a failed flag to False
     modified = False # Initialize a modified flag to False
     
-    
     try:                
-        # Get the absolute path of the JSON file
-        file_path = os.path.abspath("./cookies.json")
-        # Load the JSON file using the absolute path
-        cookies = json.loads(open(file_path, encoding="utf-8").read())
-        # Create a sydney conversation object using the cookies and the proxy
         conversation = await sydney.create_conversation(cookies=cookies, proxy=proxy)
     except Exception as e:
         logger.warning(e)
