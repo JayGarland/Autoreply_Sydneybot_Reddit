@@ -1,4 +1,5 @@
 import praw
+import asyncpraw
 import pickle
 import os
 import sys
@@ -529,7 +530,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
     # Add the system tag to the context string
     context = "<|im_start|>system\n\n" + context
     # Check the type of the content argument
-    if type(content) == praw.models.reddit.submission.Submission:
+    if type(content) == asyncpraw.models.reddit.submission.Submission:
         # If the content is a submission, set the ask string to reply to the submission
         ask_string = "请回复前述帖子。"
         if hasattr(content, 'url') and content.url.endswith((".jpg", ".png", ".jpeg", ".gif")):
@@ -590,7 +591,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
     try:
         replied = False
 
-        if type(content) != praw.models.reddit.submission.Submission:
+        if type(content) != asyncpraw.models.reddit.submission.Submission:
             if failed and not modified:
                 ask_string = f"请回复最后一条评论。只输出你回复的内容正文。不要排比，不要重复之前回复的内容或格式。"
                 modified = True
