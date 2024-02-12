@@ -635,9 +635,9 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
                             replied = True
                             reply = ""                   
                             reply = ''.join([remove_extra_format(message["text"]) for message in response["arguments"][0]["messages"]])
-                            result, pair = detect_chinese_char_pair(reply, 10)
+                            result, pair = detect_chinese_char_pair(reply, 9)
                             if result:
-                                logger.info(f"a pair of consective characters detected over 10 times. It is {pair}")
+                                logger.info(f"a pair of consective characters detected over maxed times. It is {pair}")
                                 reply = await sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nickname)
                                 break
                             if "suggestedResponses" in message:
@@ -663,9 +663,11 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
         logger.warning(e)
         if "closed" in str(e) or "connection" in str(e) or "Connection" in str(e) or "443" in str(e):
             await sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nickname, retry_count + 1)
+            return
         if "CAPTCHA" in str(e):
             return
-        reply = "抱歉，本贴主贴或评论会触发必应过滤器。这条回复是预置的，仅用于提醒此情况下虽然召唤了bot也无法回复。"
+        else:
+            reply = "抱歉，本贴主贴或评论会触发必应过滤器。这条回复是预置的，仅用于提醒此情况下虽然召唤了bot也无法回复。"
         reply += bot_statement
         content.reply(reply)
         return
