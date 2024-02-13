@@ -1,5 +1,4 @@
 import praw
-import asyncpraw
 import pickle
 import os
 import sys
@@ -18,12 +17,12 @@ from contextlib import aclosing
 
 
 with open('config.json') as f:
-    data = json.load(f)
+    config = json.load(f)
 
-bot_name = data['bot_name']  # 账号名称
-password = data['password']  # 账号密码
-client_id = data['client_id']  # api id
-client_secret = data['client_secret']  # api 密钥
+bot_name = config['bot_name']  # 账号名称
+password = config['password']  # 账号密码
+client_id = config['client_id']  # api id
+client_secret = config['client_secret']  # api 密钥
 
 user_agent = "autoreply bot created by u/Chinese_Dictator."  # 这一项可以随意填写
 subreddit_name = ["iwanttorun", "LiberalGooseGroup", "JunWuCiWeiMian"]  # 在哪个 subreddit 运行
@@ -165,9 +164,6 @@ input:
 # - 你想和{n}聊一些有趣的话题，比如音乐，电影，游戏，梗等等。
 # - 你想用轻松，幽默，创造性的语气和风格和{n}交流。
 # - 你想得到{n}的认可，赞美，同情或者友谊。
-
-with open('config.json') as f:
-    config = json.load(f)
 
 file_path = os.path.relpath("./cookies.json")
 cookies = json.loads(open(file_path, encoding="utf-8").read())
@@ -366,19 +362,21 @@ def build_comment_context(comment, ancestors, sub_user_nickname, bot_nickname, b
         if first_comment:
             first_comment = False
             if ancestor.author in bot_name_list:
-                context_str += f"{sub_user_nickname} {ancestor.author} 评论 {replied_to_author} 的帖子说“{remove_bot_statement(ancestor.body)}”\n"
                 if ancestor.author == bot_name:
                     context_str += f"{bot_nickname} 评论 {sub_user_nickname} {replied_to_author} 的帖子说“{remove_bot_statement(ancestor.body)}”\n"
-            if replied_to_author == bot_name:
+                else:
+                    context_str += f"{sub_user_nickname} {ancestor.author} 评论 {replied_to_author} 的帖子说“{remove_bot_statement(ancestor.body)}”\n"
+            elif replied_to_author == bot_name:
                 context_str += f"{sub_user_nickname} {ancestor.author} 评论 {bot_nickname} 的帖子说“{ancestor.body}”\n"
             else:
                 context_str += f"{sub_user_nickname} {ancestor.author} 评论 {replied_to_author} 的帖子说“{ancestor.body}”\n"
         else:
             if ancestor.author in bot_name_list:
-                context_str += f"{sub_user_nickname} {ancestor.author} 评论 {replied_to_author} 的回复说“{remove_bot_statement(ancestor.body)}”\n"
                 if ancestor.author == bot_name:
                     context_str += f"{bot_nickname} 评论 {sub_user_nickname} {replied_to_author} 的回复说“{remove_bot_statement(ancestor.body)}”\n"
-            if replied_to_author == bot_name:
+                else:
+                    context_str += f"{sub_user_nickname} {ancestor.author} 评论 {replied_to_author} 的回复说“{remove_bot_statement(ancestor.body)}”\n"
+            elif replied_to_author == bot_name:
                 context_str += f"{sub_user_nickname} {ancestor.author} 评论 {bot_nickname} 的回复说“{ancestor.body}”\n"
             else:
                 context_str += f"{sub_user_nickname} {ancestor.author} 评论 {replied_to_author} 的回复说“{ancestor.body}”\n"
@@ -531,8 +529,11 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
     It uses the sydney module to generate a reply for the content based on the context and the method.\n
     It returns if there is an error or a CAPTCHA, otherwise it posts the reply to Reddit"""
     
-    if retry_count > 2:
+    if retry_count > 3:
         logger.warn("Failed after maximum number of retry times")
+        reply = "抱歉，本贴主贴或评论会触发必应过滤器。这条回复是预置的，仅用于提醒此情况下虽然召唤了bot也无法回复。"
+        reply += bot_statement
+        content.reply(reply)
         return
 
     # Clean the context string using bleach
@@ -540,7 +541,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
     # Add the system tag to the context string
     context = "<|im_start|>system\n\n" + context
     # Check the type of the content argument
-    if type(content) == asyncpraw.models.reddit.submission.Submission:
+    if type(content) == praw.models.reddit.submission.Submission:
         # If the content is a submission, set the ask string to reply to the submission
         ask_string = "请回复前述帖子。"
         if hasattr(content, 'url') and content.url.endswith((".jpg", ".png", ".jpeg", ".gif")):
@@ -590,7 +591,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
     try:
         replied = False
 
-        if type(content) != asyncpraw.models.reddit.submission.Submission:
+        if type(content) != praw.models.reddit.submission.Submission:
             if failed and not modified:
                 ask_string = f"请回复最后一条评论。只输出你回复的内容正文。不要排比，不要重复之前回复的内容或格式。"
                 modified = True
@@ -626,20 +627,11 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
                             #     if "回复" not in secreply:
                             #         reply = concat_reply(reply, secreply)
                             #     reply = remove_extra_format(reply)
-                            result, pair = detect_chinese_char_pair(reply, 10)
-                            if result:
-                                logger.info(f"a pair of consective characters detected over 10 times. It is {pair}")
-                                reply = await sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nickname)
                             break
                         else:
                             replied = True
                             reply = ""                   
                             reply = ''.join([remove_extra_format(message["text"]) for message in response["arguments"][0]["messages"]])
-                            result, pair = detect_chinese_char_pair(reply, 9)
-                            if result:
-                                logger.info(f"a pair of consective characters detected over maxed times. It is {pair}")
-                                reply = await sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nickname)
-                                break
                             if "suggestedResponses" in message:
                                 visual_search_url = None
                                 break
@@ -654,6 +646,11 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
                         break                       
                 
             logger.info("reply = " + reply)
+            result, pair = detect_chinese_char_pair(reply, 9)
+            if result:
+                logger.info(f"a pair of consective characters detected over maxed times. It is {pair}")
+                await sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nickname)
+                return
             if "要和我对话请在发言中带上" not in reply:
                 reply += bot_statement
             content.reply(reply)            
@@ -662,12 +659,14 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
     except Exception as e:
         logger.warning(e)
         if "closed" in str(e) or "connection" in str(e) or "Connection" in str(e) or "443" in str(e):
-            await sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nickname, retry_count + 1)
+            await sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nickname)
             return
         if "CAPTCHA" in str(e):
             return
         else:
-            reply = "抱歉，本贴主贴或评论会触发必应过滤器。这条回复是预置的，仅用于提醒此情况下虽然召唤了bot也无法回复。"
+            await sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nickname, retry_count +1)
+            return
+        reply = "抱歉，本贴主贴或评论会触发必应过滤器。这条回复是预置的，仅用于提醒此情况下虽然召唤了bot也无法回复。"
         reply += bot_statement
         content.reply(reply)
         return
