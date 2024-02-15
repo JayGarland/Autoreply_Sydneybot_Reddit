@@ -530,7 +530,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
     It returns if there is an error or a CAPTCHA, otherwise it posts the reply to Reddit"""
     
     if retry_count > 3:
-        logger.warn("Failed after maximum number of retry times")
+        logger.warning("Failed after maximum number of retry times")
         reply = "抱歉，本贴主贴或评论会触发必应过滤器。这条回复是预置的，仅用于提醒此情况下虽然召唤了bot也无法回复。"
         reply += bot_statement
         content.reply(reply)
@@ -620,7 +620,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
                             failed = True                            
                             if not replied:
                                 pre_reply = "好的,我会满足你的要求并且只回复50字以内的内容。"
-                                reply = await stream_conversation_replied(pre_reply, context, cookies, ask_string, proxy, bot_nickname, visual_search_url)   
+                                reply = await stream_conversation_replied(pre_reply, context, ask_string, proxy, bot_nickname, visual_search_url)   
 
                             # else:    
                             #     secreply = await stream_conversation_replied(reply, context, cookies, ask_string, proxy)
