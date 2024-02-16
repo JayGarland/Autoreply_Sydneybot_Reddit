@@ -19,7 +19,7 @@ _DEBUG = False
 _PROXY = urllib.request.getproxies().get("https")
 
 _BASE_OPTION_SETS = [
-    "fluxsydney",
+    "fluxcopilot",
     "nojbf",
     "iyxapbing",
     "iycapbing",
