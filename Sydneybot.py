@@ -668,10 +668,6 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
         else:
             await sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nickname, retry_count +1)
             return
-        reply = "抱歉，本贴主贴或评论会触发必应过滤器。这条回复是预置的，仅用于提醒此情况下虽然召唤了bot也无法回复。"
-        reply += bot_statement
-        content.reply(reply)
-        return
     
     # for _ in range(4):
     #     try:
