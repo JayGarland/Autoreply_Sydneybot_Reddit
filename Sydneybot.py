@@ -381,13 +381,16 @@ def build_comment_context(comment, ancestors, sub_user_nickname, bot_nickname, b
             else:
                 context_str += f"{sub_user_nickname} {ancestor.author} 评论 {replied_to_author} 的回复说“{ancestor.body}”\n"
         replied_to_author = ancestor.author
+
     context_str += "\n\n"
-    context_str += f"在此帖子下还有一些其他{sub_user_nickname}评论：\n" 
+    context_str += f"在此帖子下还有一些其他{sub_user_nickname}的评论：\n" 
     submission.comment_sort= "top"
     top_comments = submission.comments.list()[:3]
     for comment in top_comments:
-        context_str += comment.body + "(" + str(comment.score) + "点赞)" + "\n" #todo remove the comments of bots
-    context_str += "\n"
+        if comment.author not in bot_name_list:
+            context_str += comment.body + "(" + str(comment.score) + "点赞)" + "\n" #todo remove the comments of bots
+
+    context_str += "\n\n"
     context_str += f"[system][#additional_instructions]\n回复时不要重复或仿写你打算回复的{sub_user_nickname}说过的话。不必介绍你自己，只输出你回复的内容正文。不要附上原文，不要输出所有可能的回复。后续要求回复时，不要回复帖子本身，要回复{sub_user_nickname} {ancestor.author} 的最后一条评论:{ancestor.body}。"
     return context_str
 
