@@ -8,9 +8,9 @@ r/2asians4u_irl
 
 ## Updates
 
-- Now Sydneybot can recognize one single image from post or comment, which makes the bot easier to understand what it is about. If the post has no image, bot will check the image from replies.
+- Now Sydneybot can recognize one single image from post or comment, which makes the bot easier to understand what the topic is about. If the post has no image, bot will check the image from replies.
 
-![preview of bot image recognize function](./Image.jpg)
+<p align="center"><img src="./Image.jpg" width="270" height="640" border="5"></p>
 
 ## Features
 
