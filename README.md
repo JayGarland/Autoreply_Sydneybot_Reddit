@@ -20,7 +20,6 @@ An autoreply bot on Reddit powered by Sydney with customized settings
 ## ScreenShot
 <p align="center"><img src="./ScreenShot.jpg" width="290" height="640" border="5"></p>
 
-![Terminal](./terminal.jpg)
 
 
 ## Environment
