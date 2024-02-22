@@ -196,8 +196,7 @@ You can use the [screen](https://tldr.inbrowser.app/pages/common/screen) command
 
 ## Knowing issue
 
-- reply will be cut and incomplete when there is "reply" keyword while responding
-![issue](./issue.png)
+-None, welcome to give me feedback, I'm always online.
 
 ## Credit
 
