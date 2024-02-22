@@ -708,6 +708,7 @@ def task():
         comment, ancestors = traverse_comments(comment_list=comment_list, method=method, bot_nickname=bot_callname)
         if comment is not None:
             context_str += build_comment_context(comment, ancestors, sub_user_nickname, bot_nickname, bot_name)
+            #todo add previous comments under the same post of the bot, to make his speech more consistent
             asyncio.run(sydney_reply(comment, context_str, sub_user_nickname, bot_statement.format(k = bot_nickname), bot_nickname))
             # ignored_content.add(comment.replies[-1].id) 
     if comment is None:
