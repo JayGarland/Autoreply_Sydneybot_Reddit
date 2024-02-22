@@ -1,12 +1,16 @@
 # Autoreply_Sydneybot_Reddit
-An autoreply bot on Reddit powered by Sydney with customized settings
+
+An autoreply bot on Reddit powered by Sydney with customized settings, the reason of this bot called sydneybot cuz we want it to act like a humanlike bot as the older version of the BingSearch or the now Copilot which is Sydney.
 
 ## Current deployed subReddits
-~~- r/2Asia4u~~(currently banned)
+
+r/2asians4u_irl
 
 ## Updates
+
 - Now Sydneybot can recognize one single image from post or comment, which makes the bot easier to understand what it is about. If the post has no image, bot will check the image from replies.
-<p align="center"><img src="./Image.jpg" width="270" height="640" border="5"></p>
+
+![preview of bot image recognize function](./Image.jpg){: width="270" height="640" border="5" .center}
 
 ## Features
 
@@ -14,13 +18,12 @@ An autoreply bot on Reddit powered by Sydney with customized settings
 - Create an automatic process for the task flow of reply (Start by creating a fixed format conversation including Materials for the bot to learn; bot's Prompt setting; and a asking method. Then wait AI's response, and reply a selected comment or post by accessing Reddit's API)
 - Generate better quality replies by making AI learn the style of the subreddit before replying, such as learning from users' posts and comments.
 - Customize frequency of bot reply, and conditions of triggering bot to reply.
-- Recognize image from the post or comment that bot is going to reply. 
+- Recognize image from the post or comment that bot is going to reply.
 - Make bot replies to posts and replies in multiple subs respectively.
 
 ## ScreenShot
-<p align="center"><img src="./ScreenShot.jpg" width="290" height="640" border="5"></p>
 
-
+![preview of bot image recognize function](./ScreenShot.jpg){: width="400" height="640" border="5" .center}
 
 ## Environment
 
@@ -47,8 +50,6 @@ A: New bing has an image creating function, but the censorship is strict. This b
 
 A: Users who don't want to see the bot's comments at all, please block the bot's account. Blocked accounts cannot reply to you, and will be folded by default when you browse. You can also click into the bot's personal homepage and leave a message in the pinned post. I will try to improve.
 
-
-
 If you encounter any of these issues: `Request is throttled`, `Authentication Failed`, `OSError: [WinError 64]`, etc, please try the following steps to fix them:
 
 1. Update your cookies.json.
@@ -57,7 +58,7 @@ If you encounter any of these issues: `Request is throttled`, `Authentication Fa
 
 If these steps don't work, check your proxy settings as follows:
 
-1. Go to settings in SydneyQt and try different proxy types. For example: http://127.0.0.1:7890, socks5h://127.0.0.1:7890 (the `h` letter means to send the hostname to the proxy)
+1. Go to the config.json file(if don't have this, create the file) and try different proxy types. For example: <http://127.0.0.1:7890>, socks5h://127.0.0.1:7890 (the `h` letter means to send the hostname to the proxy)
 2. If this doesn't work either, leave the proxy blank in SydneyQt, and try using [Proxifier](https://www.proxifier.com/) or Clash TUN mode.
 
 To avoid the `User needs to solve CAPTCHA to continue` error, please making sure the cookie is valid, open Bing Web in your browser and sending a random message. You should see a CAPTCHA challenge. If not, verify that the current user matches the cookies.json file. Complete the CAPTCHA and go back to SydneyQt. It should work fine now.
@@ -70,7 +71,7 @@ Please refer to [page one](./template/Prompts_Instructions.txt) and [page two](.
 
 The bot's prompts are in `Sydneybot.py`, here is just for easy viewing, please refer to the code:
 
-```
+```txt
 <|im_start|>system
 
 [system](#context)
@@ -119,56 +120,59 @@ The specific steps are as follows:
 
 1. Install requirements:
 
-```bash
-pip install -r requirements.txt
-```
+    ```bash
+    pip install -r requirements.txt
+    ```
 
 2. if you choose to use Sydney(Recommended) as a core to engine the bot please:
 
-<details>
-<summary>Follow this</summary>
+    +++ Click to expend
 
-1. Register a Microsoft account that can use [new bing](https://www.bing.com/new)
-2. Install the Cookie-Editor extension for [Chrome](https://chrome.google.com/webstore/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm) , or install it in Edge browser, [Firefox](https://addons.mozilla.org/en-US/firefox/addon/cookie-editor/)
-3. Go to `bing.com`
-4. Open the extension
-5. Click `Export` on the bottom right, then `Export as JSON` (This saves your cookies to clipboard)
-6. Paste your cookies into the file `cookies.json`.
-7. Create a json file called "config" in the project's root directory, fill it in and paste it into `config.json` as follows:
-```
-{
-    "bot_name": "", 
-    "password" : "",
-    "client_id" : "",
-    "client_secret" : "",
-    "proxy" : ""
-}
-```
-8. bot_name is a reddit account username. password is a reddit password. client_id is the id of the reddit app you created, client_secret is the secret of the application, proxy is your VPN address, you don't need it fill it if you don't use a VPN. (Steps of how to create an app on Reddit: google old.reddit-> preferances -> apps -> create application)
-</details>
+    1. Register a Microsoft account that can use [new bing](https://www.bing.com/new)
+    2. Install the Cookie-Editor extension for [Chrome](https://chrome.google.com/webstore/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm) , or install it in Edge browser, [Firefox](https://addons.mozilla.org/en-US/firefox/addon/cookie-editor/)
+    3. Go to `bing.com`
+    4. Open the extension
+    5. Click `Export` on the bottom right, then `Export as JSON` (This saves your cookies to clipboard)
+    6. Paste your cookies into the file `cookies.json`.
+    7. Create a json file called "config" in the project's root directory, fill it in and paste it into `config.json` as follows:
 
+        ```json
+        {
+            "bot_name": "", 
+            "password" : "",
+            "client_id" : "",
+            "client_secret" : "",
+            "proxy" : ""
+        }
+        ```
+
+    8. bot_name is a reddit account username. password is a reddit password. client_id is the id of the reddit app you created, client_secret is the secret of the application, proxy is your VPN address, you don't need it fill it if you don't use a VPN. (Steps of how to create an app on Reddit: google old.reddit-> preferances -> apps -> create application)
+
+    +++
 
 3. if you choose to use ChatGPT as a core to engine the bot please:
 
-<details>
-<summary>Follow this</summary>
+    +++ Click to expend
 
-1. Register an OpenAI account that can access [OpenAI's API](https://platform.openai.com/account/api-keys)
-2. Securely keep your API key, and paste it at line 357 of [gptbot](./gptbot.py)
-```
-openai.api_key = str("") # fill yourself own ChatGPT api key
-``` 
-3. set up your proxy in the config.json file as the steps in Sydney version if you are using a VPN.
-</details>
+    1. Register an OpenAI account that can access [OpenAI's API](https://platform.openai.com/account/api-keys)
+    2. Securely keep your API key, and paste it at line 357 of [gptbot](./gptbot.py)
 
+        ```python
+        openai.api_key = str("") # fill yourself own ChatGPT api key
+        ```
 
+    3. set up your proxy in the config.json file as the steps in Sydney version if you are using a VPN.
+
+    +++
 
 4. Run the bot
 
 ```cmd
 python Sydneybot.py
 ```
+
 or
+
 ```cmd
 python gptbot.py
 ```
@@ -178,7 +182,9 @@ On Linux servers, you may need to use:
 ```cmd
 python3 Sydneybot.py
 ```
+
 or
+
 ```cmd
 python3 gptbot.py
 ```
@@ -186,15 +192,19 @@ python3 gptbot.py
 You can use the [screen](https://tldr.inbrowser.app/pages/common/screen) command to keep the bot running.
 
 ## Incoming updates
+
 1. ~~wish to read images from user's post and comment~~ (Implemented) 
 2. make bot can generate content as well as Images
 3. improve bot's reply by adding former highlight replies to the system context in bot's prompt, so that it helps bot to generate replies with higher quality. 
 4. make bot chat with users in direct message chatbox
 
 ## Knowing issue
+
 - reply will be cut and incomplete when there is "reply" keyword while responding
 ![issue](./issue.png)
 
 ## Credit
-- https://github.com/AutoReplySender/Youmo-SydneyBot
-- https://github.com/juzeon/SydneyQt
+
+- <https://github.com/AutoReplySender/Youmo-SydneyBot>
+
+- <https://github.com/juzeon/SydneyQt>
