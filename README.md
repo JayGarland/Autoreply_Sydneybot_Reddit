@@ -10,7 +10,7 @@ r/2asians4u_irl
 
 - Now Sydneybot can recognize one single image from post or comment, which makes the bot easier to understand what it is about. If the post has no image, bot will check the image from replies.
 
-![preview of bot image recognize function](./Image.jpg){: width="270" height="640" border="5" .center}
+![preview of bot image recognize function](./Image.jpg)
 
 ## Features
 
@@ -23,7 +23,7 @@ r/2asians4u_irl
 
 ## ScreenShot
 
-![preview of bot image recognize function](./ScreenShot.jpg){: width="400" height="640" border="5" .center}
+![preview of bot image recognize function](./ScreenShot.jpg)
 
 ## Environment
 
@@ -126,7 +126,8 @@ The specific steps are as follows:
 
 2. if you choose to use Sydney(Recommended) as a core to engine the bot please:
 
-    +++ Click to expend
+    <details>
+    <summary>Follow this</summary>
 
     1. Register a Microsoft account that can use [new bing](https://www.bing.com/new)
     2. Install the Cookie-Editor extension for [Chrome](https://chrome.google.com/webstore/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm) , or install it in Edge browser, [Firefox](https://addons.mozilla.org/en-US/firefox/addon/cookie-editor/)
@@ -148,23 +149,18 @@ The specific steps are as follows:
 
     8. bot_name is a reddit account username. password is a reddit password. client_id is the id of the reddit app you created, client_secret is the secret of the application, proxy is your VPN address, you don't need it fill it if you don't use a VPN. (Steps of how to create an app on Reddit: google old.reddit-> preferances -> apps -> create application)
 
-    +++
+    </details>
 
 3. if you choose to use ChatGPT as a core to engine the bot please:
-
-    +++ Click to expend
-
+    <details>
+    <summary>Follow this</summary>
     1. Register an OpenAI account that can access [OpenAI's API](https://platform.openai.com/account/api-keys)
     2. Securely keep your API key, and paste it at line 357 of [gptbot](./gptbot.py)
-
         ```python
         openai.api_key = str("") # fill yourself own ChatGPT api key
         ```
-
     3. set up your proxy in the config.json file as the steps in Sydney version if you are using a VPN.
-
-    +++
-
+    </details>
 4. Run the bot
 
 ```cmd
@@ -193,7 +189,7 @@ You can use the [screen](https://tldr.inbrowser.app/pages/common/screen) command
 
 ## Incoming updates
 
-1. ~~wish to read images from user's post and comment~~ (Implemented) 
+1. ~~wish to read images from user's post and comment~~ (Implemented)
 2. make bot can generate content as well as Images
 3. improve bot's reply by adding former highlight replies to the system context in bot's prompt, so that it helps bot to generate replies with higher quality. 
 4. make bot chat with users in direct message chatbox
