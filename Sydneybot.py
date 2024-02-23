@@ -460,7 +460,6 @@ async def stream_conversation_replied(pre_reply, context, ask_string, proxy, bot
             image_url=visual_search_url,              
             wss_url='wss://' + 'sydney.bing.com' + '/sydney/ChatHub',
             # 'sydney.bing.com'
-            # sydneybot.mamba579jpy.workers.dev
             cookies=cookies,
             no_search= True
         )) as para:            
@@ -575,7 +574,6 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
                 no_search=True,             
                 wss_url='wss://' + 'sydney.bing.com' + '/sydney/ChatHub',
                 # 'sydney.bing.com'
-                # sydneybot.mamba579jpy.workers.dev
                 cookies=cookies)) as agen:            
             async for response in agen: # Iterate over the async generator of responses from sydney               
                 if response["type"] == 1 and "messages" in response["arguments"][0]:                     
