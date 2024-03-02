@@ -20,7 +20,6 @@ _PROXY = urllib.request.getproxies().get("https")
 
 _BASE_OPTION_SETS = [
     "fluxcopilot",
-    # no jailbreak filter
     "nojbf",
     "iyxapbing",
     "iycapbing",
@@ -29,7 +28,6 @@ _BASE_OPTION_SETS = [
     "disable_telemetry",
     "machine_affinity",
     "streamf",
-    # code interpreter
     "codeint",
     "langdtwb",
     "fdwtlst",
