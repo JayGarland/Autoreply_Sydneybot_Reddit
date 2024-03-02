@@ -27,6 +27,7 @@ _BASE_OPTION_SETS = [
 	# "nojbf"
 
     "fluxcopilot",
+    # no jailbreak filter
     "nojbf",
     "iyxapbing",
     "iycapbing",
@@ -35,6 +36,7 @@ _BASE_OPTION_SETS = [
     "disable_telemetry",
     "machine_affinity",
     "streamf",
+    # code interpreter
     "codeint",
     "langdtwb",
     "fdwtlst",
@@ -48,7 +50,7 @@ _BASE_OPTION_SETS = [
 
 
 class _OptionSets(Enum):
-    CREATIVE = _BASE_OPTION_SETS + ["h3imaginative"]
+    CREATIVE = _BASE_OPTION_SETS
     CREATIVECLASSIC = _BASE_OPTION_SETS + ["h3imaginative"]
     BALANCED = _BASE_OPTION_SETS + ["galileo"]
     PRECISE = _BASE_OPTION_SETS + ["h3precise"]
@@ -90,17 +92,24 @@ class _LocationHint(Enum):
         "locale": "en-US",
         "LocationHint": [
             {
-                "country": "United States",
-                "state": "California",
-                "city": "Los Angeles",
-                "timezoneoffset": 8,
-                "countryConfidence": 8,
+                "SourceType": 1,            
+                "RegionType": 2,              
                 "Center": {
-                    "Latitude": 34.0536909,
-                    "Longitude": -118.242766,
-                },
-                "RegionType": 2,
-                "SourceType": 1,
+                "Latitude": 33.97570037841797,
+				"Longitude": -118.25640106201172,
+                },                  
+                "Radius":  24902,                   
+                "Name": "Los Angeles, California",                   
+                "Accuracy": 24902,                
+                "FDConfidence": 0.5,         
+                "CountryName": "United States",           
+                "CountryConfidence": 8,      
+                "Admin1Name": "California",              
+                "PopulatedPlaceName": "Los Angeles",       
+                "PopulatedPlaceConfidence": 5, 
+                "PostCodeName": "90060",            
+                "UtcOffset": -8,               
+                "Dma": 803,  
             },
         ],
     }
@@ -184,7 +193,7 @@ def sec_ms_gec():
 
 _HEADERS = {
     "accept": "application/json",
-    "accept-language": "zh-CN,en;q=0.9",
+    "accept-language": "en-US,en;q=0.9",
     "content-type": "application/json",
     "sec-ch-ua": '"Microsoft Edge";v="113", "Chromium";v="113", "Not-A.Brand";v="24"',
     "sec-ch-ua-arch": '"x86"',
@@ -279,7 +288,7 @@ async def create_conversation(
             )
     if response.status != 200:
         text = await response.text()
-        raise Exception(f"Authentication failed {text}") #todo get raised exception and return it to the bot message text
+        raise Exception(f"Authentication failed {text}") 
     try:
         conversation = await response.json()
     except:
@@ -380,6 +389,7 @@ async def ask_stream(
                             "locale": locale,
                             "market": locale,
                             "region": locale[-2:],  # en-US -> US
+                            "location": "lat:{:.6f};long:{:.6f};re=1000m;".format(33.97570037841797, -118.25640106201172),
                             "locationHints": _get_location_hint_from_locale(locale),
                             "author": "user",
                             "inputMethod": "Keyboard",
@@ -402,7 +412,7 @@ async def ask_stream(
                                 "description": context,
                                 "contextType": "WebPage",
                                 "messageType": "Context",
-                                # "messageId": "discover-web--page-ping-mriduna-----",
+                                "messageId": "discover-web--page-ping-mriduna-----",
                             },
                         ],
                         'gptId': "copilot",
