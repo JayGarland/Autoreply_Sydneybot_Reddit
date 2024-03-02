@@ -19,13 +19,6 @@ _DEBUG = False
 _PROXY = urllib.request.getproxies().get("https")
 
 _BASE_OPTION_SETS = [
-    # "fluxsydney",
-	# "iyxapbing",
-	# "iycapbing",
-	# "clgalileoall",
-	# "gencontentv3",
-	# "nojbf"
-
     "fluxcopilot",
     "nojbf",
     "iyxapbing",
@@ -40,48 +33,40 @@ _BASE_OPTION_SETS = [
     "fdwtlst",
     "fluxprod",
     "eredirecturl",
-    # may related to image search
-    "gptvnodesc",
-    "gptvnoex",
+    "deuct3",
 ]
 
 
 
 class _OptionSets(Enum):
-    CREATIVE = _BASE_OPTION_SETS + ["h3imaginative"]
+    CREATIVE = _BASE_OPTION_SETS 
     CREATIVECLASSIC = _BASE_OPTION_SETS + ["h3imaginative"]
     BALANCED = _BASE_OPTION_SETS + ["galileo"]
     PRECISE = _BASE_OPTION_SETS + ["h3precise"]
-    DESIGNER = _BASE_OPTION_SETS + ["ai_persona_designer_gpt"] + ["h3imaginative"]
-    #todo
-    # case "Designer":
-	# 	optionsSet = append(optionsSet, "ai_persona_designer_gpt")
-	# 	options.ConversationStyle = "Creative"
-	# 	gptId = "designer"
+    
 
 
 _SLICE_IDS = [
-    "winmuid1tf",
-    "newmma-prod",
-    "imgchatgptv2",
-    "tts2",
-    "voicelang2",
-    "anssupfotest",
-    "emptyoson",
-    "tempcacheread",
-    "temptacache",
-    "ctrlworkpay",
-    "winlongmsg2tf",
-    "628fabocs0",
-    "531rai268s0",
-    "602refusal",
-    "621alllocs0",
-    "621docxfmtho",
-    "621preclsvn",
-    "330uaug",
-    "529rweas0",
-    "0626snptrcs0",
-    "619dagslnv1nr"
+    "schurmsg",
+    "ntbkcf",
+    "rankcf",
+    "bgstreamcf",
+    "cmcallapptf",
+    "vnextvoicecf",
+    "tts5cf",
+    "abv2mobcf",
+    "ctvismctrl",
+    "suppsm240rev10-t",
+    "suppsm240-t",
+    "translrefctrl",
+    "1215perscs0",
+    "0212bops0",
+    "116langwb",
+    "0112wtlsts0",
+    "118wcsmw",
+    "1201reasons0",
+    "0116trimgd",
+    "cacfastapis"
 ]
 
 
@@ -168,14 +153,11 @@ _ALLOWED_MESSAGE_TYPES = [
     "Context",
     "InternalSearchQuery",
     "InternalSearchResult",
-    "Disengaged",
     "InternalLoaderMessage",
     "Progress",
-    "RenderCardRequest",
-    "AdsQuery",
-    "SemanticSerp",
     "GenerateContentQuery",
-    "SearchQuery"
+    "SearchQuery",
+    "GeneratedCode",
 ]
         
 def sec_ms_gec():
@@ -184,7 +166,7 @@ def sec_ms_gec():
 
 _HEADERS = {
     "accept": "application/json",
-    "accept-language": "zh-CN,en;q=0.9",
+    "accept-language": "en-US,en;q=0.9",
     "content-type": "application/json",
     "sec-ch-ua": '"Microsoft Edge";v="113", "Chromium";v="113", "Not-A.Brand";v="24"',
     "sec-ch-ua-arch": '"x86"',
@@ -208,39 +190,49 @@ _HEADERS = {
     "x-forwarded-for": _FORWARDED_IP,
 }
 
+SYDNEY_HEADER = _HEADERS.update(
+    {
+        "Host": "sydney.bing.com",
+        "Cache-Control": "no-cache",
+        "Connection": "Upgrade",
+        "Origin": "https://www.bing.com",
+        "Pragma": "no-cache",
+    })
+
 _HEADERS_INIT_CONVER = {
-    "authority": "www.bing.com",
     "accept": "application/json",
-    "accept-language": "zh-CN,en;q=0.9",
+    "accept-language": "en;q=0.9,en-US;q=0.8",
     "cache-control": "max-age=0",
-    "sec-ch-ua": '"Chromium";v="110", "Not A(Brand";v="24", "Microsoft Edge";v="110"',
+    "sec-ch-ua": '"Not A(Brand";v="99", '
+                 '"Microsoft Edge";v="121", '
+                 '"Chromium";v="121"',
     "sec-ch-ua-arch": '"x86"',
     "sec-ch-ua-bitness": '"64"',
-    "sec-ch-ua-full-version": '"110.0.1587.69"',
-    "sec-ch-ua-full-version-list": '"Chromium";v="110.0.5481.192", "Not A(Brand";v="24.0.0.0", "Microsoft Edge";v="110.0.1587.69"',
+    "sec-ch-ua-full-version": '"121.0.2277.128"',
+    "sec-ch-ua-full-version-list": '"Not A(Brand";v="99.0.0.0", '
+                                   '"Microsoft Edge";v="121.0.2277.128", '
+                                   '"Chromium";v="121.0.6167.184"',
     "sec-ch-ua-mobile": "?0",
     "sec-ch-ua-model": '""',
     "sec-ch-ua-platform": '"Windows"',
     "sec-ch-ua-platform-version": '"15.0.0"',
     "upgrade-insecure-requests": "1",
-    "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.46",
     "x-edge-shopping-flag": "1",
+    "X-Ms-Useragent": "azsdk-js-api-client-factory/1.0.0-beta.1 core-rest-pipeline/1.12.3 OS/Windows",
     "x-forwarded-for": _FORWARDED_IP,
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+                  " AppleWebKit/537.36 (KHTML, like Gecko) "
+                  "Chrome/121.0.0.0 Safari/537.36 "
+                  "Edg/121.0.0.0",
 }
 
-_HEADERS_INIT_CREATIMG = {
-    "authority":                 "www.bing.com",
-    "accept":                    "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-    "accept-language":           "en-US,en;q=0.9",
-    "cache-control":             "no-cache",
-    "referer":                   "https://www.bing.com/search?q=Bing+AI&showconv=1",
-    "upgrade-insecure-requests": "1",
-    "user-agent":                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.46",
-    "x-forwarded-for":           _FORWARDED_IP,
-    "Sec-Fetch-Dest":            "iframe",
-}
+SYDNEY_INIT_HEADER = _HEADERS_INIT_CONVER.update(
+    {
+        "Referer": "https://copilot.microsoft.com/",
+        "X-Edge-Shopping-Flag": "0",
+    })
 
-
+BUNDLE_VERSION = "1.1573.4"
 
 def _print(msg):
     if _DEBUG:
@@ -261,19 +253,23 @@ async def create_conversation(
             formatted_cookies[cookie["name"]] = cookie["value"]
     async with aiohttp.ClientSession(
             cookies=formatted_cookies,
-            headers=_HEADERS_INIT_CONVER,
+            headers=SYDNEY_INIT_HEADER,
     ) as session:
-        timeout = aiohttp.ClientTimeout(total=10)
+        timeout = aiohttp.ClientTimeout(total=30)
         try:
             response = await session.get(
-                url="https://edgeservices.bing.com/edgesvc/turing/conversation/create",
+                url=os.environ.get("BING_PROXY_URL")
+                    or f"https://edgeservices.bing.com/edgesvc/turing/conversation/create"
+                       f"?bundleVersion={BUNDLE_VERSION}",
                 proxy=proxy,
                 timeout=timeout,
             )
         except asyncio.TimeoutError:
             print("Request timedout, retrying...")
             response = await session.get(
-                url="https://edgeservices.bing.com/edgesvc/turing/conversation/create",
+                url=os.environ.get("BING_PROXY_URL")
+                    or f"https://edgeservices.bing.com/edgesvc/turing/conversation/create"
+                       f"?bundleVersion={BUNDLE_VERSION}",
                 proxy=proxy,
                 timeout=timeout,
             )
@@ -290,6 +286,7 @@ async def create_conversation(
     if 'X-Sydney-Encryptedconversationsignature' in response.headers:
         conversation['sec_access_token'] = response.headers['X-Sydney-Encryptedconversationsignature']
     
+    return conversation
     #todo Iterates over "set-cookie" headers, parses values, and logs modified cookies.
     # if 'set-cookie' in response.headers:
     #     modified_cookies = {}
@@ -310,7 +307,6 @@ async def create_conversation(
     #     # Update session cookies with modified values (if applicable)
     #     # ... (update logic based on framework/library)
 
-    return conversation
 
 
 def _get_location_hint_from_locale(locale: str) -> Union[dict, None]:
@@ -331,7 +327,7 @@ async def ask_stream(
         prompt: str,
         context: str,
         conversation_style: str = "creative",
-        locale: str = "zh-CN",
+        locale: str = "en-US",
         proxy=_PROXY,
         image_url=None,
         wss_url='wss://sydney.bing.com/sydney/ChatHub',
@@ -354,7 +350,7 @@ async def ask_stream(
                 # wss_url,
                 wss_url + ('?sec_access_token=' + urllib.parse.quote_plus(sec_access_token) if sec_access_token else ''),
                 autoping=False,
-                headers=_HEADERS,
+                headers=SYDNEY_HEADER,
                 proxy=proxy
         ) as wss:
             await wss.send_str(_format({'protocol': 'json', 'version': 1}))
@@ -368,14 +364,14 @@ async def ask_stream(
                 'arguments': [
                     {
                         'optionsSets': option_sets,
-                        'source': 'cib-ccp',
+                        'source': 'cib',
                         'allowedMessageTypes': _ALLOWED_MESSAGE_TYPES,
                         'sliceIds': _SLICE_IDS,
                         "verbosity": "verbose",
                         "scenario": "SERP",
                         'traceId': os.urandom(16).hex(),
                         'requestId': message_id,
-                        'isStartOfSession': True,
+                        'isStartOfSession': True, #there can be an option to have continous reply
                         'message': {
                             "locale": locale,
                             "market": locale,
@@ -384,7 +380,7 @@ async def ask_stream(
                             "author": "user",
                             "inputMethod": "Keyboard",
                             "text": prompt,
-                            "messageType": random.choice(["Chat", "CurrentWebpageContextRequest"]),
+                            "messageType": "Chat", #random.choice(["Chat", "CurrentWebpageContextRequest"]),
                             "requestId": message_id,
                             "messageId": message_id,
                             "imageUrl": image_url or None,
@@ -402,10 +398,9 @@ async def ask_stream(
                                 "description": context,
                                 "contextType": "WebPage",
                                 "messageType": "Context",
-                                # "messageId": "discover-web--page-ping-mriduna-----",
+                                "messageId": "discover-web--page-ping-mriduna-----",
                             },
-                        ],
-                        'gptId': "copilot",
+                        ]
                     }
                 ],
                 'invocationId': '0',
@@ -498,68 +493,3 @@ async def upload_image(filename=None, img_base64=None, proxy=None):
                 return (await resp.json())["blobId"]
         except asyncio.TimeoutError:
             raise Exception("Timedout please try again!")
-
-#todo image create
-# @dataclass
-# class GenerativeImage:
-#     text: str
-#     url: str
-
-# @dataclass
-# class GenerateImageResult:
-#     generative_image: GenerativeImage
-#     image_urls: list[str]
-#     # duration: float  # Representing time.Duration in Python
-# import re
-# import asyncio
-# async def generate_image(
-#     proxy: str | None = _PROXY,
-#     generative_image: GenerativeImage | None = None,
-#     cookies: list[dict] | None = None,
-# ) -> (GenerateImageResult, Exception | None):
-
-#     formatted_cookies = {}
-#     if cookies:
-#         for cookie in cookies:
-#             formatted_cookies[cookie["name"]] = cookie["value"]
-
-#     async with aiohttp.ClientSession(
-#         headers=_HEADERS_INIT_CREATIMG, cookies=formatted_cookies
-#     ) as session:
-#         try:
-#             async with session.get(generative_image.url, proxy=proxy) as resp:
-#                 resp.raise_for_status()
-#                 text = await resp.text()
-
-#                 # Extract result ID
-#                 matches = re.findall(
-#                     r"/images/create/async/results/(.*?)\?", text
-#                 )
-#                 if not matches or len(matches) < 2:
-#                     return None, Exception("Cannot find image creation result")
-#                 result_id = matches[1]
-
-#                 # Await image creation
-#                 result_url = f"https://www.bing.com/images/create/async/results/{result_id}?q={urllib.parse.quote(generative_image.text)}&partner=sydney&showselective=1&IID=images.as"
-#                 for _ in range(15):
-#                     await asyncio.sleep(3)
-#                     async with session.get(result_url, proxy=proxy) as result_resp:
-#                         result_resp.raise_for_status()
-#                         text = await result_resp.text()
-
-#                         # Check for rejection
-#                         if "Please try again or come back later" in text:
-#                             return None, Exception("Prompt rejected by Bing")
-
-#                         # Extract image URLs
-#                         image_urls = re.findall(r'<img class="mimg".*?src="(.*?)"', text)
-#                         if image_urls:
-#                             return GenerateImageResult(
-#                                 generate_image=generative_image,
-#                                 image_urls=image_urls,
-#                             ), None
-
-#         except aiohttp.ClientError as err:
-#             return None, err
-
-#     return None, Exception("Image creation timeout")
