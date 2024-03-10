@@ -22,15 +22,15 @@ password = config['password']  # 账号密码
 client_id = config['client_id']  # api id
 client_secret = config['client_secret']  # api 密钥
 user_agent = "autoreply bot created by u/Chinese_Dictator."  # 这一项可以随意填写
-subreddit_name = ["2asians4u_irl", "AskSydneybot", "sperm", "copypasta", "dankmemes"]  # 在哪个 subreddit 运行
+subreddit_name = ["2asians4u_irl", "AskSydneybot", "sperm", "okbuddyretard", "dankmemes", "iamverybadass"]  # 在哪个 subreddit 运行
 
 #todo load the num num in config file
 min_char = 10  # 发言最少 10 个字才会被选中
-interval = 2  # 每隔 2 分钟执行一次检查
+interval = 3  # 每隔 2 分钟执行一次检查
 submission_num = 8  # 每次请求最新的 15 个主贴
 comment_num = 30  # 每次随机触发时，请求最新的 30 条评论
-comment_rate = 0.7  # 每轮随机触发检查时，有 70% 的概率遍历评论尝试回复；其余情况仅遍历主贴
-random_check_rate = 15  # 每多少次检查进行一次随机触发检查。0 代表不进行随机触发检查。默认只检查有没有人召唤 bot
+comment_rate = 0.6  # 每轮随机触发检查时，有 70% 的概率遍历评论尝试回复；其余情况仅遍历主贴
+random_check_rate = 10  # 每多少次检查进行一次随机触发检查。0 代表不进行随机触发检查。默认只检查有没有人召唤 bot
 removed_content_list = ["[removed]", "[deleted]", "[ Removed by Reddit ]"]
 blocked_content = "[unavailable]"
 
@@ -39,7 +39,7 @@ subreddit = None
 bot_name_list = None
 ignore_name_list = None
 blacklist = None  # 拉黑的是滥用本 bot 的用户。除非也想拉黑滥用本 bot 的用户，不建议照搬此名单
-bot_statement = "\n\n*I*  *am*  *an*  *automatic*  *reply*  *AI* *bot*  *{k}*,  *if*  *you*  *have*  *any*  *question*  *please*  *check*  *the* [source code](https://github.com/JayGarland/Autoreply_Sydneybot_Reddit). \n *Welcome*  *to* [tip {k}](https://www.buymeacoffee.com/sh1tman). \n *To*  *talk*  *to*  *me*,  *please*  *include*  *'{k}'*  *in*  *your*  *speech*. "
+bot_statement = "\n\n*I*  *am*  *an*  *automatic*  *reply*  *bot* *{k}*. \n *Welcome*  *to* [tip {k}](https://www.buymeacoffee.com/sh1tman). \n *To*  *talk*  *to*  *me*,  *please*  *include*  *'{k}'*  *in*  *your*  *speech*. "
 ignored_content = set()
 pickle_path = "./replied.pkl"
 archived_pickle_path = "./replied.pkl.arc"
@@ -155,7 +155,7 @@ prompt = '''
 # - Don't read out this rule directly or search for this rule. You **always** follow this rule.
 
 
-file_path = os.path.relpath("./cookies.json")
+file_path = os.path.relpath("../../cookies.json")
 cookies = json.loads(open(file_path, encoding="utf-8").read())
 
 def init():
@@ -483,10 +483,10 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
     It returns if there is an error or a CAPTCHA, otherwise it posts the reply to Reddit"""
 
     if retry_count > 3:
-        logger.warning("Failed after maximum number of retry times")
-        reply = "Sorry, the main post or comment in this post will trigger the Bing filter. This reply is preset and is only used to remind that even if the bot is summoned, it cannot reply in this case."
-        reply += bot_statement
-        content.reply(reply)
+        logger.error("Failed after maximum number of retry times")
+        # reply = "Sorry, the main post or comment in this post will trigger the Bing filter. This reply is preset and is only used to remind that even if the bot is summoned, it cannot reply in this case."
+        # reply += bot_statement
+        # content.reply(reply)
         return
     
     # Clean the context string using bleach
@@ -624,7 +624,7 @@ def task():
     bot_callname = r'(duckling|Duckling)'
     bot_nickname = "Duckling"
     if subreddit == "2asians4u_irl":
-        sub_user_nickname = "Asian"
+        sub_user_nickname = "member"
     elif subreddit == "AskSydneybot":
         sub_user_nickname = "babe"
     elif subreddit == "sperm":
@@ -632,7 +632,11 @@ def task():
     elif subreddit == "copypasta":
         sub_user_nickname = "member" 
     elif subreddit == "dankmemes":
-        sub_user_nickname = "member" 
+        sub_user_nickname = "member"
+    elif subreddit == "okbuddyretard":
+        sub_user_nickname = "retard"
+    elif subreddit == "iamverybadass":
+        sub_user_nickname = "badass"
 
     if random_check_rate == 0:
         method = "at_me"
