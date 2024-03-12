@@ -20,20 +20,25 @@ _PROXY = urllib.request.getproxies().get("https")
 
 _BASE_OPTION_SETS = [
     "fluxcopilot",
-    "nojbf",
-    "iyxapbing",
-    "iycapbing",
-    "dgencontentv3",
-    "nointernalsugg",
-    "disable_telemetry",
-    "machine_affinity",
-    "streamf",
-    "codeint",
-    "langdtwb",
-    "fdwtlst",
-    "fluxprod",
-    "eredirecturl",
-    "deuct3",
+	"nojbf", # no jailbreak filter
+	"iyxapbing",
+	"iycapbing",
+	"dgencontentv3",
+	"nointernalsugg",
+	"disable_telemetry",
+	"machine_affinity",
+	"streamf",
+	"langdtwb",
+	"fdwtlst",
+	"fluxprod",
+	"eredirecturl",
+	"gptvnodesc",  # may related to image search
+	"gptvnoex",    # may related to image search
+	"codeintfile", # code interpreter + file uploader
+	"sdretrieval", # retrieve upload file
+	"gamaxinvoc",  # file reader invocation
+	"ldsummary",   # our guess: long document summary
+	"ldqa",        # our guess: long document quality assurance
 ]
 
 
@@ -41,7 +46,7 @@ _BASE_OPTION_SETS = [
 class _OptionSets(Enum):
     CREATIVE = _BASE_OPTION_SETS 
     CREATIVECLASSIC = _BASE_OPTION_SETS + ["h3imaginative"]
-    BALANCED = _BASE_OPTION_SETS + ["galileo"]
+    BALANCED = _BASE_OPTION_SETS + ["galileo"] + ["gldcl1p"]
     PRECISE = _BASE_OPTION_SETS + ["h3precise"]
     
 
