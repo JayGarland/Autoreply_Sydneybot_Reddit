@@ -548,7 +548,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
     # Check the type of the content argument
     if type(content) == praw.models.reddit.submission.Submission:
         # If the content is a submission, set the ask string to reply to the submission
-        ask_string = "请回复前述帖子。"
+        ask_string = f"请回复前述{content.author}的帖子。"
         if hasattr(content, 'url') and content.url.endswith((".jpg", ".png", ".jpeg", ".gif")):
             visual_search_url = content.url
         else:
