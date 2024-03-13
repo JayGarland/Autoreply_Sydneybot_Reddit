@@ -44,7 +44,7 @@ _BASE_OPTION_SETS = [
 
 
 class _OptionSets(Enum):
-    CREATIVE = _BASE_OPTION_SETS 
+    CREATIVE = _BASE_OPTION_SETS + ["h3imaginative"]
     CREATIVECLASSIC = _BASE_OPTION_SETS + ["h3imaginative"]
     BALANCED = _BASE_OPTION_SETS + ["galileo"] + ["gldcl1p"]
     PRECISE = _BASE_OPTION_SETS + ["h3precise"]
@@ -337,7 +337,7 @@ async def ask_stream(
         image_url=None,
         wss_url='wss://sydney.bing.com/sydney/ChatHub',
         cookies: list[dict] | None = None,
-        no_search: bool = False,
+        no_search: bool = True,
 ):
     timeout = aiohttp.ClientTimeout(total=900)
     formatted_cookies = {}
