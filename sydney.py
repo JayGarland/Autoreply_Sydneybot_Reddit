@@ -331,7 +331,7 @@ async def ask_stream(
         conversation: dict,
         prompt: str,
         context: str,
-        conversation_style: str = "creative",
+        conversation_style: str = "balanced",
         locale: str = "en-US",
         proxy=_PROXY,
         image_url=None,
