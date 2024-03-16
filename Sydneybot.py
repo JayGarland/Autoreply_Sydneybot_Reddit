@@ -30,7 +30,7 @@ interval = 3  # 每隔 2 分钟执行一次检查
 submission_num = 8  # 每次请求最新的 15 个主贴
 comment_num = 30  # 每次随机触发时，请求最新的 30 条评论
 comment_rate = 0.6  # 每轮随机触发检查时，有 70% 的概率遍历评论尝试回复；其余情况仅遍历主贴
-random_check_rate = 10  # 每多少次检查进行一次随机触发检查。0 代表不进行随机触发检查。默认只检查有没有人召唤 bot
+random_check_rate = 7  # 每多少次检查进行一次随机触发检查。0 代表不进行随机触发检查。默认只检查有没有人召唤 bot
 removed_content_list = ["[removed]", "[deleted]", "[ Removed by Reddit ]"]
 blocked_content = "[unavailable]"
 
@@ -449,7 +449,7 @@ async def stream_conversation_replied(pre_reply, context, ask_string, proxy, bot
             wss_url='wss://' + 'sydney.bing.com' + '/sydney/ChatHub',
             # 'sydney.bing.com'
             cookies=cookies,
-            no_search= False
+            no_search= True
         )) as para:            
             async for secresponse in para:
                 if secresponse["type"] == 1 and "messages" in secresponse["arguments"][0]:
@@ -497,7 +497,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
     # Check the type of the content argument
     if type(content) == praw.models.reddit.submission.Submission:
         # If the content is a submission, set the ask string to reply to the submission
-        ask_string = "Please reply to the last post."
+        ask_string = "Please give a witty critique to the last post."
         if hasattr(content, 'url') and content.url.endswith((".jpg", ".png", ".jpeg", ".gif")):
             visual_search_url = content.url
         else:
@@ -506,7 +506,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
     else:
         # If the content is a comment, set the ask string to reply to the last comment
         # Also specify not to repeat or use parallelism in the reply
-        ask_string = f"Please reply to {sub_user_nickname} {content.author}'s last reply. Needn't introduce yourself. Only output the content of your reply. Do not compare, do not repeat the content or format of the previous replies.\n"
+        ask_string = f"Please give a witty critique to {sub_user_nickname} {content.author}'s last reply. Needn't introduce yourself. Only output the content of your reply. Do not compare, do not repeat the content or format of the previous replies.\n"
         if '<img' in content.body_html:
             # Find the image source URL by parsing the html body
             img_src = re.search(r'<img src="(.+?)"', content.body_html).group(1)
@@ -559,7 +559,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
                 context=context,                                
                 proxy=proxy,
                 image_url=visual_search_url,
-                no_search=False,             
+                no_search=True,             
                 wss_url='wss://' + 'sydney.bing.com' + '/sydney/ChatHub',
                 # 'sydney.bing.com'
                 cookies=cookies)) as agen:            
