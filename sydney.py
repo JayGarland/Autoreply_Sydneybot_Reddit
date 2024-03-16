@@ -19,7 +19,7 @@ _DEBUG = False
 _PROXY = urllib.request.getproxies().get("https")
 
 _BASE_OPTION_SETS = [
-    "fluxcopilot",
+    "fluxsydney",
 	"nojbf", # no jailbreak filter
 	"iyxapbing",
 	"iycapbing",
@@ -39,13 +39,14 @@ _BASE_OPTION_SETS = [
 	"gamaxinvoc",  # file reader invocation
 	"ldsummary",   # our guess: long document summary
 	"ldqa",        # our guess: long document quality assurance
+    "gpt4tmncnp"
 ]
 
 
 
 class _OptionSets(Enum):
     CREATIVE = _BASE_OPTION_SETS + ["h3imaginative"]
-    CREATIVECLASSIC = _BASE_OPTION_SETS + ["h3imaginative"]
+    CREATIVECLASSIC = _BASE_OPTION_SETS 
     BALANCED = _BASE_OPTION_SETS + ["galileo"] + ["gldcl1p"]
     PRECISE = _BASE_OPTION_SETS + ["h3precise"]
     
@@ -331,13 +332,13 @@ async def ask_stream(
         conversation: dict,
         prompt: str,
         context: str,
-        conversation_style: str = "balanced",
+        conversation_style: str = "creative",
         locale: str = "en-US",
         proxy=_PROXY,
         image_url=None,
         wss_url='wss://sydney.bing.com/sydney/ChatHub',
         cookies: list[dict] | None = None,
-        no_search: bool = True,
+        no_search: bool = False,
 ):
     timeout = aiohttp.ClientTimeout(total=900)
     formatted_cookies = {}
