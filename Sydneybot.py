@@ -498,7 +498,7 @@ async def stream_conversation_replied(pre_reply, context, ask_string, proxy, bot
                             #     reply = concat_reply(reply, secreply)
                             # reply = remove_extra_format(reply)
                             # break
-                            return reply
+                            raise Exception("Failed reply even though retried")
                         else:
                             reply = ""                   
                             reply = ''.join([remove_extra_format(message["text"]) for message in secresponse["arguments"][0]["messages"]])
@@ -550,7 +550,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
     # Check the type of the content argument
     if type(content) == praw.models.reddit.submission.Submission:
         # If the content is a submission, set the ask string to reply to the submission
-        ask_string = f"{bot_nickname}请吐槽前述{content.author}的帖子。"
+        ask_string = f"{bot_nickname}请幽默地回复前述{content.author}的帖子。"
         if hasattr(content, 'url') and content.url.endswith((".jpg", ".png", ".jpeg", ".gif")):
             visual_search_url = content.url
         else:
@@ -558,7 +558,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
     else:
         # If the content is a comment, set the ask string to reply to the last comment
         # Also specify not to repeat or use parallelism in the reply
-        ask_string = f"{bot_nickname}请吐槽{sub_user_nickname} {content.author} 的最后一条评论。不必介绍你自己，只输出你吐槽的内容正文。不要排比，不要重复之前回复的内容或格式。"
+        ask_string = f"{bot_nickname}请幽默地回复{sub_user_nickname} {content.author} 的最后一条评论。不必介绍你自己，只输出你回复的内容正文。不要排比，不要重复之前回复的内容或格式。"
         if '<img' in content.body_html:
             # Find the image source URL by parsing the html body
             img_src = re.search(r'<img src="(.+?)"', content.body_html).group(1)
@@ -622,7 +622,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
                     msg_type = message.get("messageType")
                     content_origin = message.get("contentOrigin")
                     if msg_type is None:                       
-                        if content_origin == "Apology": # Check if the message content origin is Apology, which means sydney failed to generate a reply 
+                        if content_origin == "Apology": # Check if the message content origin is Apology
                             failed = True                            
                             if not replied:
                                 pre_reply = "好的,我会满足你的要求并且只回复50字以内的内容。"
