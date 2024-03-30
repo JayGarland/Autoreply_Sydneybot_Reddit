@@ -22,7 +22,7 @@ password = config['password']  # 账号密码
 client_id = config['client_id']  # api id
 client_secret = config['client_secret']  # api 密钥
 user_agent = "autoreply bot created by u/Chinese_Dictator."  # 这一项可以随意填写
-subreddit_name = ["2asians4u_irl", "AskSydneybot", "sperm", "okbuddyretard", "dankmemes", "iamverybadass"]  # 在哪个 subreddit 运行
+subreddit_name = ["AskSydneybot", "sperm", "dankmemes", "iamverybadass"]  # 在哪个 subreddit 运行
 
 #todo load the num num in config file
 min_char = 10  # 发言最少 10 个字才会被选中
@@ -497,7 +497,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
     # Check the type of the content argument
     if type(content) == praw.models.reddit.submission.Submission:
         # If the content is a submission, set the ask string to reply to the submission
-        ask_string = "Please give a witty critique to the last post."
+        ask_string = "Please reply to the last post."
         if hasattr(content, 'url') and content.url.endswith((".jpg", ".png", ".jpeg", ".gif")):
             visual_search_url = content.url
         else:
@@ -506,7 +506,7 @@ async def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_n
     else:
         # If the content is a comment, set the ask string to reply to the last comment
         # Also specify not to repeat or use parallelism in the reply
-        ask_string = f"Please give a witty critique to {sub_user_nickname} {content.author}'s last reply. Needn't introduce yourself. Only output the content of your reply. Do not compare, do not repeat the content or format of the previous replies.\n"
+        ask_string = f"Please reply to {sub_user_nickname} {content.author}'s last reply. Needn't introduce yourself. Only output the content of your reply. Do not compare, do not repeat the content or format of the previous replies.\n"
         if '<img' in content.body_html:
             # Find the image source URL by parsing the html body
             img_src = re.search(r'<img src="(.+?)"', content.body_html).group(1)
