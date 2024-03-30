@@ -18,59 +18,128 @@ _DEBUG = False
 
 _PROXY = urllib.request.getproxies().get("https")
 
-_BASE_OPTION_SETS = [
-    "fluxsydney",
-	"nojbf", # no jailbreak filter
-	"iyxapbing",
-	"iycapbing",
-	"dgencontentv3",
-	"nointernalsugg",
-	"disable_telemetry",
-	"machine_affinity",
-	"streamf",
-	"langdtwb",
-	"fdwtlst",
-	"fluxprod",
-	"eredirecturl",
-	"gptvnodesc",  # may related to image search
-	"gptvnoex",    # may related to image search
-	"codeintfile", # code interpreter + file uploader
-	"sdretrieval", # retrieve upload file
-	"gamaxinvoc",  # file reader invocation
-	"ldsummary",   # our guess: long document summary
-	"ldqa",        # our guess: long document quality assurance
-    "gpt4tmncnp"
+
+creative = [
+    "nlu_direct_response_filter",
+    "deepleo",
+    "disable_emoji_spoken_text",
+    "responsible_ai_policy_235",
+    "enablemm",
+    "dv3sugg",
+    "iyxapbing",
+    "iycapbing",
+    "h3imaginative",
+    "clgalileo",
+    "gencontentv3",
+    "uquopt",
+    "sunoupsell",
+    "gndlogcf",
+    "flxvsearch",
+    "noknowimg",
+    "eredirecturl"
+    ]
+creative_classic = [
+    "nlu_direct_response_filter",
+    "deepleo",
+    "disable_emoji_spoken_text",
+    "responsible_ai_policy_235",
+    "enablemm",
+    "dv3sugg",
+    "iyxapbing",
+    "iycapbing",
+    "h3imaginative",
+    "clgalileo",
+    "gencontentv3",
+    "uquopt",
+    "sunoupsell",
+    "gndlogcf",
+    "flxvsearch",
+    "noknowimg",
+    "eredirecturl"
+]
+balanced = [
+    "nlu_direct_response_filter",
+    "deepleo",
+    "disable_emoji_spoken_text",
+    "responsible_ai_policy_235",
+    "enablemm",
+    "dv3sugg",
+    "iyxapbing",
+    "iycapbing",
+    "enable_user_consent",
+    "fluxmemcst",
+    "galileo",
+    "saharagenconv5",
+    "dc1mncp",
+    "uquopt",
+    "sunoupsell",
+    "crkt2t",
+    "immslots",
+    "cpproname",
+    "vidtoppb",
+    "gptv1desc2",
+    "eredirecturl"
+]
+precise = [
+    "nlu_direct_response_filter",
+    "deepleo",
+    "disable_emoji_spoken_text",
+    "responsible_ai_policy_235",
+    "enablemm",
+    "dv3sugg",
+    "iyxapbing",
+    "iycapbing",
+    "enable_user_consent",
+    "fluxmemcst",
+    "h3precise",
+    "clgalileo",
+    "uquopt",
+    "sunoupsell",
+    "crkt2t",
+    "flxvsearchans",
+    "noknowimg",
+    "eredirecturl"
 ]
 
+
+
 class _OptionSets(Enum):
-    CREATIVE = _BASE_OPTION_SETS + ["h3imaginative"]
-    CREATIVECLASSIC = _BASE_OPTION_SETS
-    BALANCED = _BASE_OPTION_SETS + ["galileo"]
-    PRECISE = _BASE_OPTION_SETS + ["h3precise"]
+    CREATIVE = ["nojbf"] + creative
+    CREATIVECLASSIC = ["nojbf"] + creative_classic
+    BALANCED = ["nojbf"] + balanced
+    PRECISE = ["nojbf"] + precise
     
 
 
 _SLICE_IDS = [
-    "schurmsg",
-    "ntbkcf",
-    "rankcf",
-    "bgstreamcf",
-    "cmcallapptf",
-    "vnextvoicecf",
-    "tts5cf",
-    "abv2mobcf",
-    "ctvismctrl",
-    "suppsm240rev10-t",
-    "suppsm240-t",
-    "translrefctrl",
-    "1215perscs0",
-    "0212bops0",
-    "116langwb",
-    "0112wtlsts0",
-    "118wcsmw",
-    "1201reasons0",
-    "0116trimgd",
-    "cacfastapis"
+    "disbotgrtcf",
+    "ntbkgold2",
+    "ntbkf1",
+    "qna10",
+    "thdnsrch",
+    "slangcf",
+    "vnextr100",
+    "vnext100",
+    "vnextvoice",
+    "rdlidncf",
+    "semserpnomlbg",
+    "semserpnoml",
+    "srchqryfix",
+    "cacntjndcae",
+    "edgenorrwrap",
+    "cmcpupsalltf",
+    "sunoupsell",
+    "313dynaplfs0",
+    "0312hrthrots0",
+    "0317immslotsc",
+    "228pyfiles0",
+    "kcclickthrucf",
+    "sportsatis0",
+    "0317dc1pro",
+    "defgrey",
+    "ssadsv4chtiidnoifbm",
+    "adsltmdsc",
+    "ssadsv2nocm"
 ]
 
 
@@ -79,24 +148,17 @@ class _LocationHint(Enum):
         "locale": "en-US",
         "LocationHint": [
             {
-                "SourceType": 1,            
-                "RegionType": 2,              
+                "country": "United States",
+                "state": "California",
+                "city": "Los Angeles",
+                "timezoneoffset": 8,
+                "countryConfidence": 8,
                 "Center": {
-                "Latitude": 33.97570037841797,
-				"Longitude": -118.25640106201172,
-                },                  
-                "Radius":  24902,                   
-                "Name": "Los Angeles, California",                   
-                "Accuracy": 24902,                
-                "FDConfidence": 0.5,         
-                "CountryName": "United States",           
-                "CountryConfidence": 8,      
-                "Admin1Name": "California",              
-                "PopulatedPlaceName": "Los Angeles",       
-                "PopulatedPlaceConfidence": 5, 
-                "PostCodeName": "90060",            
-                "UtcOffset": -8,               
-                "Dma": 803,  
+                    "Latitude": 34.0536909,
+                    "Longitude": -118.242766,
+                },
+                "RegionType": 2,
+                "SourceType": 1,
             },
         ],
     }
@@ -161,14 +223,21 @@ _FORWARDED_IP = f"1.0.0.{random.randint(0, 255)}"
 _ALLOWED_MESSAGE_TYPES = [
     "ActionRequest",
     "Chat",
+    "ConfirmationCard",
     "Context",
     "InternalSearchQuery",
     "InternalSearchResult",
+    "Disengaged",
     "InternalLoaderMessage",
     "Progress",
+    "RenderCardRequest",
+    "RenderContentRequest",
+    "AdsQuery",
+    "SemanticSerp",
     "GenerateContentQuery",
     "SearchQuery",
     "GeneratedCode",
+    "InternalTasksMessage"
 ]
         
 def sec_ms_gec():
@@ -243,7 +312,7 @@ SYDNEY_INIT_HEADER = _HEADERS_INIT_CONVER.update(
         "X-Edge-Shopping-Flag": "0",
     })
 
-BUNDLE_VERSION = "1.1573.4"
+BUNDLE_VERSION = "1.1642.1"
 
 def _print(msg):
     if _DEBUG:
@@ -264,7 +333,7 @@ async def create_conversation(
             formatted_cookies[cookie["name"]] = cookie["value"]
     async with aiohttp.ClientSession(
             cookies=formatted_cookies,
-            headers=SYDNEY_INIT_HEADER,
+            headers=_HEADERS_INIT_CONVER,
     ) as session:
         timeout = aiohttp.ClientTimeout(total=30)
         try:
@@ -286,7 +355,7 @@ async def create_conversation(
             )
     if response.status != 200:
         text = await response.text()
-        raise Exception(f"Authentication failed {text}") 
+        raise Exception(f"Authentication failed {text}") #todo get raised exception and return it to the bot message text
     try:
         conversation = await response.json()
     except:
@@ -337,7 +406,7 @@ async def ask_stream(
         conversation: dict,
         prompt: str,
         context: str,
-        conversation_style: str = "creative",
+        conversation_style: str = "precise",
         locale: str = "en-US",
         proxy=_PROXY,
         image_url=None,
@@ -361,7 +430,7 @@ async def ask_stream(
                 # wss_url,
                 wss_url + ('?sec_access_token=' + urllib.parse.quote_plus(sec_access_token) if sec_access_token else ''),
                 autoping=False,
-                headers=SYDNEY_HEADER,
+                headers=_HEADERS,
                 proxy=proxy
         ) as wss:
             await wss.send_str(_format({'protocol': 'json', 'version': 1}))
@@ -369,13 +438,13 @@ async def ask_stream(
             await wss.send_str(_format({"type": 6}))
             option_sets = getattr(_OptionSets, conversation_style.upper()).value.copy()
             if no_search:
-                option_sets += 'nosearchall'
+                option_sets += 'noSearch'
 
             struct = {
                 'arguments': [
                     {
                         'optionsSets': option_sets,
-                        'source': 'cib',
+                        'source': 'cib-ccp',
                         'allowedMessageTypes': _ALLOWED_MESSAGE_TYPES,
                         'sliceIds': _SLICE_IDS,
                         "verbosity": "verbose",
@@ -387,7 +456,6 @@ async def ask_stream(
                             "locale": locale,
                             "market": locale,
                             "region": locale[-2:],  # en-US -> US
-                            "location": "lat:{:.6f};long:{:.6f};re=1000m;".format(33.97570037841797, -118.25640106201172),
                             "locationHints": _get_location_hint_from_locale(locale),
                             "author": "user",
                             "inputMethod": "Keyboard",
@@ -505,68 +573,3 @@ async def upload_image(filename=None, img_base64=None, proxy=None):
                 return (await resp.json())["blobId"]
         except asyncio.TimeoutError:
             raise Exception("Timedout please try again!")
-
-#todo image create
-# @dataclass
-# class GenerativeImage:
-#     text: str
-#     url: str
-
-# @dataclass
-# class GenerateImageResult:
-#     generative_image: GenerativeImage
-#     image_urls: list[str]
-#     # duration: float  # Representing time.Duration in Python
-# import re
-# import asyncio
-# async def generate_image(
-#     proxy: str | None = _PROXY,
-#     generative_image: GenerativeImage | None = None,
-#     cookies: list[dict] | None = None,
-# ) -> (GenerateImageResult, Exception | None):
-
-#     formatted_cookies = {}
-#     if cookies:
-#         for cookie in cookies:
-#             formatted_cookies[cookie["name"]] = cookie["value"]
-
-#     async with aiohttp.ClientSession(
-#         headers=_HEADERS_INIT_CREATIMG, cookies=formatted_cookies
-#     ) as session:
-#         try:
-#             async with session.get(generative_image.url, proxy=proxy) as resp:
-#                 resp.raise_for_status()
-#                 text = await resp.text()
-
-#                 # Extract result ID
-#                 matches = re.findall(
-#                     r"/images/create/async/results/(.*?)\?", text
-#                 )
-#                 if not matches or len(matches) < 2:
-#                     return None, Exception("Cannot find image creation result")
-#                 result_id = matches[1]
-
-#                 # Await image creation
-#                 result_url = f"https://www.bing.com/images/create/async/results/{result_id}?q={urllib.parse.quote(generative_image.text)}&partner=sydney&showselective=1&IID=images.as"
-#                 for _ in range(15):
-#                     await asyncio.sleep(3)
-#                     async with session.get(result_url, proxy=proxy) as result_resp:
-#                         result_resp.raise_for_status()
-#                         text = await result_resp.text()
-
-#                         # Check for rejection
-#                         if "Please try again or come back later" in text:
-#                             return None, Exception("Prompt rejected by Bing")
-
-#                         # Extract image URLs
-#                         image_urls = re.findall(r'<img class="mimg".*?src="(.*?)"', text)
-#                         if image_urls:
-#                             return GenerateImageResult(
-#                                 generate_image=generative_image,
-#                                 image_urls=image_urls,
-#                             ), None
-
-#         except aiohttp.ClientError as err:
-#             return None, err
-
-#     return None, Exception("Image creation timeout")
