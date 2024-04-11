@@ -18,55 +18,128 @@ _DEBUG = False
 
 _PROXY = urllib.request.getproxies().get("https")
 
-_BASE_OPTION_SETS = [
-    "fluxcopilot",
-    "nojbf",
+
+creative = [
+    "nlu_direct_response_filter",
+    "deepleo",
+    "disable_emoji_spoken_text",
+    "responsible_ai_policy_235",
+    "enablemm",
+    "dv3sugg",
     "iyxapbing",
     "iycapbing",
-    "dgencontentv3",
-    "nointernalsugg",
-    "disable_telemetry",
-    "machine_affinity",
-    "streamf",
-    "codeint",
-    "langdtwb",
-    "fdwtlst",
-    "fluxprod",
-    "eredirecturl",
-    "deuct3"
+    "h3imaginative",
+    "clgalileo",
+    "gencontentv3",
+    "uquopt",
+    "sunoupsell",
+    "gndlogcf",
+    "flxvsearch",
+    "noknowimg",
+    "eredirecturl"
+    ]
+creative_classic = [
+    "nlu_direct_response_filter",
+    "deepleo",
+    "disable_emoji_spoken_text",
+    "responsible_ai_policy_235",
+    "enablemm",
+    "dv3sugg",
+    "iyxapbing",
+    "iycapbing",
+    "h3imaginative",
+    "clgalileo",
+    "gencontentv3",
+    "uquopt",
+    "sunoupsell",
+    "gndlogcf",
+    "flxvsearch",
+    "noknowimg",
+    "eredirecturl"
+]
+balanced = [
+    "nlu_direct_response_filter",
+    "deepleo",
+    "disable_emoji_spoken_text",
+    "responsible_ai_policy_235",
+    "enablemm",
+    "dv3sugg",
+    "iyxapbing",
+    "iycapbing",
+    "enable_user_consent",
+    "fluxmemcst",
+    "galileo",
+    "saharagenconv5",
+    "dc1mncp",
+    "uquopt",
+    "sunoupsell",
+    "crkt2t",
+    "immslots",
+    "cpproname",
+    "vidtoppb",
+    "gptv1desc2",
+    "eredirecturl"
+]
+precise = [
+    "nlu_direct_response_filter",
+    "deepleo",
+    "disable_emoji_spoken_text",
+    "responsible_ai_policy_235",
+    "enablemm",
+    "dv3sugg",
+    "iyxapbing",
+    "iycapbing",
+    "enable_user_consent",
+    "fluxmemcst",
+    "h3precise",
+    "clgalileo",
+    "uquopt",
+    "sunoupsell",
+    "crkt2t",
+    "flxvsearchans",
+    "noknowimg",
+    "eredirecturl"
 ]
 
 
 
 class _OptionSets(Enum):
-    CREATIVE = _BASE_OPTION_SETS
-    CREATIVECLASSIC = _BASE_OPTION_SETS 
-    BALANCED = _BASE_OPTION_SETS + ["galileo"] + ["gldcl1p"]
-    PRECISE = _BASE_OPTION_SETS + ["h3precise"]
+    CREATIVE = ["nojbf"] + creative
+    CREATIVECLASSIC = ["nojbf"] + creative_classic
+    BALANCED = ["nojbf"] + balanced
+    PRECISE = ["nojbf"] + precise
     
 
 
 _SLICE_IDS = [
-    "schurmsg",
-    "ntbkcf",
-    "rankcf",
-    "bgstreamcf",
-    "cmcallapptf",
-    "vnextvoicecf",
-    "tts5cf",
-    "abv2mobcf",
-    "ctvismctrl",
-    "suppsm240rev10-t",
-    "suppsm240-t",
-    "translrefctrl",
-    "1215perscs0",
-    "0212bops0",
-    "116langwb",
-    "0112wtlsts0",
-    "118wcsmw",
-    "1201reasons0",
-    "0116trimgd",
-    "cacfastapis"
+    "disbotgrtcf",
+    "ntbkgold2",
+    "ntbkf1",
+    "qna10",
+    "thdnsrch",
+    "slangcf",
+    "vnextr100",
+    "vnext100",
+    "vnextvoice",
+    "rdlidncf",
+    "semserpnomlbg",
+    "semserpnoml",
+    "srchqryfix",
+    "cacntjndcae",
+    "edgenorrwrap",
+    "cmcpupsalltf",
+    "sunoupsell",
+    "313dynaplfs0",
+    "0312hrthrots0",
+    "0317immslotsc",
+    "228pyfiles0",
+    "kcclickthrucf",
+    "sportsatis0",
+    "0317dc1pro",
+    "defgrey",
+    "ssadsv4chtiidnoifbm",
+    "adsltmdsc",
+    "ssadsv2nocm"
 ]
 
 
@@ -150,14 +223,21 @@ _FORWARDED_IP = f"1.0.0.{random.randint(0, 255)}"
 _ALLOWED_MESSAGE_TYPES = [
     "ActionRequest",
     "Chat",
+    "ConfirmationCard",
     "Context",
     "InternalSearchQuery",
     "InternalSearchResult",
+    "Disengaged",
     "InternalLoaderMessage",
     "Progress",
+    "RenderCardRequest",
+    "RenderContentRequest",
+    "AdsQuery",
+    "SemanticSerp",
     "GenerateContentQuery",
     "SearchQuery",
     "GeneratedCode",
+    "InternalTasksMessage"
 ]
         
 def sec_ms_gec():
@@ -232,7 +312,7 @@ SYDNEY_INIT_HEADER = _HEADERS_INIT_CONVER.update(
         "X-Edge-Shopping-Flag": "0",
     })
 
-BUNDLE_VERSION = "1.1573.4"
+BUNDLE_VERSION = "1.1642.1"
 
 def _print(msg):
     if _DEBUG:
@@ -253,7 +333,7 @@ async def create_conversation(
             formatted_cookies[cookie["name"]] = cookie["value"]
     async with aiohttp.ClientSession(
             cookies=formatted_cookies,
-            headers=SYDNEY_INIT_HEADER,
+            headers=_HEADERS_INIT_CONVER,
     ) as session:
         timeout = aiohttp.ClientTimeout(total=30)
         try:
@@ -350,7 +430,7 @@ async def ask_stream(
                 # wss_url,
                 wss_url + ('?sec_access_token=' + urllib.parse.quote_plus(sec_access_token) if sec_access_token else ''),
                 autoping=False,
-                headers=SYDNEY_HEADER,
+                headers=_HEADERS,
                 proxy=proxy
         ) as wss:
             await wss.send_str(_format({'protocol': 'json', 'version': 1}))
@@ -358,13 +438,13 @@ async def ask_stream(
             await wss.send_str(_format({"type": 6}))
             option_sets = getattr(_OptionSets, conversation_style.upper()).value.copy()
             if no_search:
-                option_sets += 'nosearchall'
+                option_sets += 'noSearch'
 
             struct = {
                 'arguments': [
                     {
                         'optionsSets': option_sets,
-                        'source': 'cib',
+                        'source': 'cib-ccp',
                         'allowedMessageTypes': _ALLOWED_MESSAGE_TYPES,
                         'sliceIds': _SLICE_IDS,
                         "verbosity": "verbose",
