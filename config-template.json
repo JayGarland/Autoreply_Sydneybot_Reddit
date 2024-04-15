@@ -1,0 +1,16 @@
+{
+    "bot_name": "",
+    "password" : "",
+    "client_id" : "",
+    "client_secret" : "",
+    "proxy" : "",
+    "bot_account": [],
+    "blacklist":[], 
+    "blocked_account": [""],
+    "TargetSubreddits":[""],
+    "gemini_api_key": "",
+    "persona": "",
+    "pre_reply": "",
+    "customSet": [{"":""}],
+    "bot_statement":""
+}
