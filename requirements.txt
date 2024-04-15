@@ -7,3 +7,6 @@ httpx~=0.24.1
 BingImageCreator~=0.4.2
 rich~=13.4.1
 emoji~=2.6.0
+
+# if gemini-pro
+google-generativeai
