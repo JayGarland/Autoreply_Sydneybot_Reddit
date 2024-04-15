@@ -19,12 +19,13 @@ client_id = conf().get('client_id') # api id
 client_secret = conf().get('client_secret')  # api 密钥
 
 user_agent = "autoreply bot created by u/Chinese_Dictator."  # 这一项可以随意填写
-subreddit_name = list(conf().get('TargetSubreddits')[0].keys())[0]
-subreddit_names =  [subreddit_name for list(conf().get('TargetSubreddits')[0].keys())[0] in conf().get('TargetSubreddits')]  # 在哪个 subreddit 运行
+targetSubreddits = conf().get('TargetSubreddits')
+subreddit_names =  [list(targetSubreddits[i].keys())[0] for i in range(len(targetSubreddits))]  # 在哪个 subreddit 运行
+logger.info(subreddit_names)
 
 
-min_char = 1  # at least how many word in user's speech will trigger the bot reply
-interval = 1 # check every interval minute
+min_char = 10  # at least how many word in user's speech will trigger the bot reply
+interval = 3# check every interval minute
 submission_num = 10  # everytime bot observe how many posts
 comment_num = 30  # every pattern when triggered the reply randomly, how many replies will be pulled and let the bot observe
 comment_rate = 0.7  # every pattern when triggered the reply randomly, how much rate of the bot choose to reply the comment under a post, if not, reply to a post
@@ -80,6 +81,7 @@ def init():
     global bot_name_list
     global ignore_name_list
     global blacklist
+    global random_subReddit
 
     reddit = praw.Reddit(client_id=client_id, client_secret=client_secret, password=password, user_agent=user_agent, username=bot_name)
     random_subReddit = random.choice(subreddit_names)
@@ -188,7 +190,7 @@ def submission_list_to_context(submission_list, sub_user_nickname, subreddit):
         submission_str = f"{sub_user_nickname} {submission.author} 发布了标题为“{submission.title}”的帖子"
         if submission.selftext != "":
             # 限制内容长度；Python 切片不会索引越界
-            submission_str += f"，内容是“{submission.selftext[:300]}”"
+            submission_str += f"，内容是“{submission.selftext[:1000]}”"
         submission_str += "\n"
         context_str += submission_str
     return context_str
@@ -199,7 +201,7 @@ def build_submission_context(submission, sub_user_nickname):
     context_str += f"帖子标题是“{submission.title}”"
     if submission.selftext != "":
         # 限制内容长度；Python 切片不会索引越界
-        context_str += f"，内容是“{submission.selftext[:4000]}”"
+        context_str += f"，内容是“{submission.selftext[:6000]}”"
     context_str += "\n\n"
     context_str += f"[system][#additional_instructions]\n吐槽时不要重复或仿写你打算吐槽的{sub_user_nickname}说过的话。不必介绍你自己，只输出你吐槽内容的正文。不要附上原文，不要输出所有可能的吐槽。" #todo add a first chat history append
     return context_str
@@ -401,9 +403,9 @@ def init_prompt_botstatement(sub_user_nickname, bot_nickname):
                 break
     if not persona:
         persona = conf().get("persona")
-        persona = persona.format(n = sub_user_nickname, k = bot_nickname, m= subreddit)
         pre_reply = conf().get("pre_reply")
-        pre_reply = pre_reply.format(n = sub_user_nickname, k = bot_nickname)
+    persona = persona.format(n = sub_user_nickname, k = bot_nickname, m= subreddit)
+    pre_reply = pre_reply.format(n = sub_user_nickname, k = bot_nickname)
     logger.info("PERSONA:" + persona)
     return persona, pre_reply
 
@@ -490,10 +492,14 @@ def task():
     init()
     logger.info(subreddit)
 
-    name_config = conf().get("TargetSubreddits")[0][f"{subreddit}"]
-    bot_callname = r'{}'.format(name_config["bot_callname"])
-    bot_nickname = name_config["bot_nickname"]
-    sub_user_nickname = name_config["sub_user_nickname"]
+    for reddit in conf().get("TargetSubreddits"):
+        if random_subReddit in reddit:
+            bot_callname = r'{}'.format(reddit[random_subReddit]["bot_callname"])
+            bot_nickname = reddit[random_subReddit]["bot_nickname"]
+            sub_user_nickname = reddit[random_subReddit]["sub_user_nickname"]
+            break
+
+
     if random_check_rate == 0:
         method = "at_me"
     elif i % random_check_rate == 0:
