@@ -19,7 +19,8 @@ client_id = conf().get('client_id') # api id
 client_secret = conf().get('client_secret')  # api 密钥
 
 user_agent = "autoreply bot created by u/Chinese_Dictator."  # 这一项可以随意填写
-subreddit_name = conf().get('TargetSubreddits')  # 在哪个 subreddit 运行
+subreddit_name = list(conf().get('TargetSubreddits')[0].keys())[0]
+subreddit_names =  [subreddit_name for list(conf().get('TargetSubreddits')[0].keys())[0] in conf().get('TargetSubreddits')]  # 在哪个 subreddit 运行
 
 
 min_char = 1  # at least how many word in user's speech will trigger the bot reply
@@ -81,7 +82,7 @@ def init():
     global blacklist
 
     reddit = praw.Reddit(client_id=client_id, client_secret=client_secret, password=password, user_agent=user_agent, username=bot_name)
-    random_subReddit = random.choice(subreddit_name)
+    random_subReddit = random.choice(subreddit_names)
     subreddit = reddit.subreddit(random_subReddit)
 
     bot_name_list = conf().get("bot_account")
@@ -488,14 +489,11 @@ def task():
     global i
     init()
     logger.info(subreddit)
-    if subreddit == "TaoYuanCommunist":
-        bot_callname = r'[老|佬]儿'
-        bot_nickname = "桃源佬儿"
-        sub_user_nickname = "桃源佬儿"
-    elif subreddit == "AskSydneybot":
-        bot_callname = r'[悉尼|Sydney|sydney]'
-        bot_nickname = "悉尼"
-        sub_user_nickname = "member"
+
+    name_config = conf().get("TargetSubreddits")[0][f"{subreddit}"]
+    bot_callname = r'{}'.format(name_config["bot_callname"])
+    bot_nickname = name_config["bot_nickname"]
+    sub_user_nickname = name_config["sub_user_nickname"]
     if random_check_rate == 0:
         method = "at_me"
     elif i % random_check_rate == 0:
