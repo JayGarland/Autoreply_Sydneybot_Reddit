@@ -11,8 +11,6 @@ Reddit的自动回复机器人
 - CRITICAL! 更新了bot的配置代码，不再是把配置写在运行的代码中，以及一些HARD CODE，而是把配置全部写在config.json中
 - 支持对目标的每个sub为bot设置不同的人设
 
-<p align="center"><img src="./Image.jpg" width="360" height="640" border="5"></p>
-
 ## 功能
 
 - 通过修改第一条聊天记录的方式来越狱GEMINI.
@@ -21,9 +19,6 @@ Reddit的自动回复机器人
 - 自定义机器人回复的频率和触发机器人回复的条件。
 
 ## 截图
-<p align="center"><img src="./ScreenShot.jpg" width="290" height="640" border="5"></p>
-
-![SUB配置](./terminal.jpg)
 
 
 ## 环境
