@@ -20,7 +20,3 @@ keys = [key.strip() for key in keys]
 if not keys:
     raise Exception("Please set a valid API key in config.json file!")
 genai.configure(api_key=random.choice(keys))
-
-
-model = genai.GenerativeModel("gemini-1.5-pro-latest", safety_settings=SAFETY_SETTINGS)
-# img_model = genai.GenerativeModel("gemini-pro-vision", safety_settings=SAFETY_SETTINGS)

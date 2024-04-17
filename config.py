@@ -19,6 +19,12 @@ available_setting = {
     "blacklist":[], 
     "blocked_account": [""],
     "TargetSubreddits":[""],
+    "min_char" : 10,  # at least how many word in user's speech will trigger the bot reply
+    "interval" : 3, # check every interval minute
+    "submission_num" : 10,  # everytime bot observe how many posts
+    "comment_num" : 30,  # every pattern when triggered the reply randomly, how many replies will be pulled and let the bot observe
+    "comment_rate" : 0.7,  # every pattern when triggered the reply randomly, how much rate of the bot choose to reply the comment under a post, if not, reply to a post
+    "random_check_rate" : 6,  # bot everytime when bot checks, how many check patterns would trigger the bot to reply randomly otherwise only reply when someone @ the bot
     "gemini_api_key": "",
     "persona": "",
     "pre_reply": "",

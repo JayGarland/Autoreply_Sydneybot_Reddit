@@ -9,7 +9,7 @@ import bleach
 import re
 import json
 from log import logger
-from llm import model
+from llm import genai, SAFETY_SETTINGS
 from config import load_config, conf
 
 load_config()
@@ -24,12 +24,12 @@ subreddit_names =  [list(targetSubreddits[i].keys())[0] for i in range(len(targe
 # logger.info(subreddit_names)
 
 
-min_char = 10  # at least how many word in user's speech will trigger the bot reply
-interval = 3 # check every interval minute
-submission_num = 10  # everytime bot observe how many posts
-comment_num = 30  # every pattern when triggered the reply randomly, how many replies will be pulled and let the bot observe
-comment_rate = 0.7  # every pattern when triggered the reply randomly, how much rate of the bot choose to reply the comment under a post, if not, reply to a post
-random_check_rate = 6  # bot everytime when bot checks, how many check patterns would trigger the bot to reply randomly otherwise only reply when someone @ the bot
+min_char = conf().get('min_char')  # at least how many word in user's speech will trigger the bot reply
+interval = conf().get('interval') # check every interval minute
+submission_num = conf().get('submission_num')  # everytime bot observe how many posts
+comment_num = conf().get('comment_num')  # every pattern when triggered the reply randomly, how many replies will be pulled and let the bot observe
+comment_rate = conf().get('comment_rate')  # every pattern when triggered the reply randomly, how much rate of the bot choose to reply the comment under a post, if not, reply to a post
+random_check_rate = conf().get('random_check_rate')  # bot everytime when bot checks, how many check patterns would trigger the bot to reply randomly otherwise only reply when someone @ the bot
 
 removed_content_list = ["[removed]", "[deleted]", "[ Removed by Reddit ]"]
 blocked_content = "[unavailable]"
@@ -469,8 +469,9 @@ def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nicknam
                 modified = True
             if failed and modified:
                 ask_string = f"请吐槽最后一条评论。只输出你吐槽的内容正文。"
-
-        gemini_messages = construct_preset(sub_user_nickname, bot_nickname) + askbycontext(context, ask_string)
+        persona, pre_reply = init_prompt_botstatement(sub_user_nickname, bot_nickname)
+        model = genai.GenerativeModel(model_name="gemini-1.5-pro-latest", safety_settings=SAFETY_SETTINGS, system_instruction=persona)
+        gemini_messages = askbycontext(context, ask_string)
         response = model.generate_content(gemini_messages)
         reply_text = response.text
         logger.info(reply_text)
@@ -484,8 +485,7 @@ def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nicknam
         traceback.print_exc()
         logger.warning(e)
         sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nickname, retry_count +1)
-    
-        
+
 def task():
     global ignored_content
     global i
@@ -529,24 +529,3 @@ def task():
             # ignored_content.add(submission.replies[-1].id)
     logger.info(f"本轮检查结束，方法是 {method}。")
     i += 1
-
-
-if __name__ == "__main__":
-    random.seed()
-    try:
-        task()
-        scheduler = BlockingScheduler()
-        scheduler.add_job(task, trigger='interval', minutes=interval)
-        scheduler.start()
-    except BaseException as e:
-        import traceback
-        traceback.print_exc()
-        logger.error(e)
-        logger.info("Saving ignored content_id...")
-        if os.path.exists(pickle_path):
-            os.replace(pickle_path, archived_pickle_path)
-        with open(pickle_path, "wb") as pickleFile:
-            pickle.dump(ignored_content, pickleFile)
-        logger.info("Completed.")
-        sys.exit()
-
