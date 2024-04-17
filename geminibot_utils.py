@@ -409,11 +409,11 @@ def init_prompt_botstatement(sub_user_nickname, bot_nickname):
     logger.info("PERSONA:" + persona)
     return persona, pre_reply
 
-def askbycontext(context, ask_string):
+def askbyuser(ask_string):
     res = []
     res.append({
             "role": "user",
-            "parts": [{"text": context + "\n\n" + ask_string}]
+            "parts": [{"text": "\n\n" + ask_string}]
         })
     return res
 
@@ -470,8 +470,8 @@ def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nicknam
             if failed and modified:
                 ask_string = f"请吐槽最后一条评论。只输出你吐槽的内容正文。"
         persona, pre_reply = init_prompt_botstatement(sub_user_nickname, bot_nickname)
-        model = genai.GenerativeModel(model_name="gemini-1.5-pro-latest", safety_settings=SAFETY_SETTINGS, system_instruction=persona)
-        gemini_messages = askbycontext(context, ask_string)
+        model = genai.GenerativeModel(model_name="gemini-1.5-pro-latest", safety_settings=SAFETY_SETTINGS, system_instruction=persona + "\n\n" + context)
+        gemini_messages = askbyuser(ask_string)
         response = model.generate_content(gemini_messages)
         reply_text = response.text
         logger.info(reply_text)
