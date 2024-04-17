@@ -413,7 +413,7 @@ def askbyuser(ask_string):
     res = []
     res.append({
             "role": "user",
-            "parts": [{"text": "\n\n" + ask_string}]
+            "parts": [{"text": ask_string}]
         })
     return res
 
