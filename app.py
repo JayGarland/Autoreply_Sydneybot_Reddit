@@ -6,7 +6,7 @@ if __name__ == "__main__":
     try:
         task()
         scheduler = BlockingScheduler()
-        scheduler.add_job(task, trigger='interval', minutes=random.randint(2, interval))
+        scheduler.add_job(task, trigger='interval', minutes=random.randint(1, interval))
         scheduler.start()
     except BaseException as e:
         import traceback
