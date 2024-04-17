@@ -21,11 +21,11 @@ client_secret = conf().get('client_secret')  # api 密钥
 user_agent = "autoreply bot created by u/Chinese_Dictator."  # 这一项可以随意填写
 targetSubreddits = conf().get('TargetSubreddits')
 subreddit_names =  [list(targetSubreddits[i].keys())[0] for i in range(len(targetSubreddits))]  # 在哪个 subreddit 运行
-logger.info(subreddit_names)
+# logger.info(subreddit_names)
 
 
 min_char = 10  # at least how many word in user's speech will trigger the bot reply
-interval = 3# check every interval minute
+interval = 3 # check every interval minute
 submission_num = 10  # everytime bot observe how many posts
 comment_num = 30  # every pattern when triggered the reply randomly, how many replies will be pulled and let the bot observe
 comment_rate = 0.7  # every pattern when triggered the reply randomly, how much rate of the bot choose to reply the comment under a post, if not, reply to a post
@@ -405,7 +405,7 @@ def init_prompt_botstatement(sub_user_nickname, bot_nickname):
         persona = conf().get("persona")
         pre_reply = conf().get("pre_reply")
     persona = persona.format(n = sub_user_nickname, k = bot_nickname, m= subreddit)
-    pre_reply = pre_reply.format(n = sub_user_nickname, k = bot_nickname)
+    pre_reply = pre_reply.format(n = sub_user_nickname, k = bot_nickname, m= subreddit)
     logger.info("PERSONA:" + persona)
     return persona, pre_reply
 

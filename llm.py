@@ -22,5 +22,5 @@ if not keys:
 genai.configure(api_key=random.choice(keys))
 
 
-model = genai.GenerativeModel("gemini-pro", safety_settings=SAFETY_SETTINGS)
-img_model = genai.GenerativeModel("gemini-pro-vision", safety_settings=SAFETY_SETTINGS)
+model = genai.GenerativeModel("gemini-1.5-pro-latest", safety_settings=SAFETY_SETTINGS)
+# img_model = genai.GenerativeModel("gemini-pro-vision", safety_settings=SAFETY_SETTINGS)
