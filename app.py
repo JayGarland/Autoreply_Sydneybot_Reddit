@@ -1,11 +1,12 @@
 from geminibot_utils import *
+import random
 
 if __name__ == "__main__":
     random.seed()
     try:
         task()
         scheduler = BlockingScheduler()
-        scheduler.add_job(task, trigger='interval', minutes=interval)
+        scheduler.add_job(task, trigger='interval', minutes=random.randint(2, interval))
         scheduler.start()
     except BaseException as e:
         import traceback
