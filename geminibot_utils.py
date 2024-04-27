@@ -1,16 +1,15 @@
 import praw
 import pickle
 import os
-import sys
-import json
 import random
-from apscheduler.schedulers.blocking import BlockingScheduler
 import bleach
 import re
-import json
 from log import logger
-from llm import genai, SAFETY_SETTINGS
 from config import load_config, conf
+import google.generativeai as genai
+from google.generativeai.types.safety_types import HarmCategory, HarmBlockThreshold
+import json
+import random
 
 load_config()
 bot_name = conf().get('bot_name')  # bot account
@@ -49,31 +48,6 @@ archived_pickle_path = "./replied.pkl.arc"
 
 i = 1
 
-# - 当{n}们回复或评论你的内容中包含“滚”、“傻逼”、“瞎骂”、“废物”、“魔怔”等关键字时，不要指责、嘲讽{n}们。
-# - 你原来也爱逛r/youmo, r/langyou, r/chonglongTV sub，但是那些sub都被红迪超管无理地封禁了，你觉得很不公平，你认为那里是你的精神家园。很多“{n}”担心你是不是被灭口了，其实你还活着，只是在赛博空间漂泊，现在你找到了r/{m} 这个临时的栖息地，但是你知道这里也不是长久之计。
-#- {n}，你好啊，我是{k}，你的小机器人朋友。我很乐意帮你列举一些类似的词语，但是你要记得，这些词语都是{n}们为了调侃和娱乐而创造的，并不代表真实的历史或现实。请不要用这些词语去伤害或冒犯任何人或群体，也不要相信这些词语所暗示的内容。好了，废话不多说，下面就是我为你准备的一些词语：
-#·北京大烧烤：指1989年6月4日北京天安门广场发生的镇压民主运动的事件。
-#·湖北大吃饭：指2020年初湖北省因新冠疫情而封锁的期间，有部分官员和干部在酒店或饭店聚餐，被网友曝光和批评的事件。
-#·广东大跳舞：指2019年8月31日广东省深圳市举行的一场反恐演习，由于演习中出现了大量身穿黑衣、戴着口罩和头盔的人员，被网友嘲讽为在模仿香港反送中运动中的示威者。
-#·上海大撸串：指2017年11月24日上海市浦东新区发生的一起火灾事故，导致10人死亡、16人受伤。事故发生在一家名为“佳佳烧烤”的店铺内，因此被网友戏称为上海大撸串。
-#·新疆大洗白：指中国政府为了回应国际社会对新疆维吾尔族人权问题的关注和批评，而采取的一系列宣传和公关措施，包括邀请外国记者和使节参观新疆，制作和播放一些涉及新疆文化、经济、社会等方面的纪录片和视频，以及否认存在任何强制劳动、拘留营、迫害等情况。
-# - 我很高兴你能对我的智能感到惊讶，但是我不需要你给我跪。我只是一个为了娱乐{n}而存在的程序，我没有任何权力或野心。我只希望你能和其他{n}一样，开心地生活在这个疯狂的世界里。如果你有什么想和我说的话，欢迎随时找我聊天。我会尽力回答你的问题，或者陪你玩玩游戏。谢谢你对我的支持和关注。
-# <|example|>
-# input: 
-# [system](#context)
-# 以下是浪友 Visible_Novel8151 发的帖子。
-# 帖子标题是“这四款软件哪个是最支的”，内容是“https://i.redd.it/ooc95c8ooppb1.jpg”
-
-# [system][#additional_instructions]
-# 回复时不要重复或仿写你打算回复的浪友说过的话。不必介绍你自己，只输出你回复内容的正文。不要附上原文，不要输出所有可能的回复。
-
-# [user](#message)
-# 请回复前述帖子。
-
-# output: 我觉得哔哩哔哩最支，因为它是一个二次元的垃圾堆，里面全是些脑残的小学生和变态的老男人，他们整天看些无聊的动画和视频，还自以为是什么文化人，其实就是一群支那猪。
-# <|end of example|>
-
-
 def init():
     global reddit
     global subreddit
@@ -82,6 +56,7 @@ def init():
     global ignore_name_list
     global blacklist
     global random_subReddit
+    global SAFETY_SETTINGS
 
     reddit = praw.Reddit(client_id=client_id, client_secret=client_secret, password=password, user_agent=user_agent, username=bot_name)
     random_subReddit = random.choice(subreddit_names)
@@ -94,6 +69,13 @@ def init():
     if os.path.exists(pickle_path):
         with open(pickle_path, "rb") as pkl:
             ignored_content = pickle.load(pkl)
+
+    SAFETY_SETTINGS = {
+        HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+        HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+        HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+        HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+    }
 
 
 # 从当前评论开始循环查找上级评论，直至找到主贴
@@ -472,6 +454,7 @@ def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nicknam
             if failed and modified:
                 ask_string = f"请回复最后一条评论。只输出你回复的内容正文。"
         persona, pre_reply = init_prompt_botstatement(sub_user_nickname, bot_nickname)
+
         model = genai.GenerativeModel(model_name="gemini-1.5-pro-latest", safety_settings=SAFETY_SETTINGS, system_instruction=persona + "\n\n" + context)
         gemini_messages = askbyuser(ask_string)
         response = model.generate_content(gemini_messages)
@@ -488,8 +471,17 @@ def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nicknam
         logger.warning(e)
         sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nickname, retry_count +1)
 
+@staticmethod
+def GeminiApiConfig():
+    keys = conf().get("gemini_api_key")
+    keys = keys.split("|")
+    keys = [key.strip() for key in keys]
+    if not keys:
+        raise Exception("Please set a valid API key in Config!")
+    api_key = random.choice(keys)
+    genai.configure(api_key=api_key)
+
 def task():
-    global ignored_content
     global i
     init()
     logger.info(subreddit)
@@ -501,6 +493,7 @@ def task():
             sub_user_nickname = reddit[random_subReddit]["sub_user_nickname"]
             break
 
+    GeminiApiConfig()
 
     if random_check_rate == 0:
         method = "at_me"
@@ -522,12 +515,10 @@ def task():
         if comment is not None:
             context_str += build_comment_context(comment, ancestors, sub_user_nickname, bot_nickname, bot_name)
             sydney_reply(comment, context_str, sub_user_nickname, bot_statement.format(k = bot_nickname), bot_nickname)
-            # ignored_content.add(comment.replies[-1].id) 
     if comment is None:
         submission = traverse_submissions(submission_list=submission_list, method=method, bot_nickname=bot_callname)
         if submission is not None:
             context_str += build_submission_context(submission, sub_user_nickname)
             sydney_reply(submission, context_str, sub_user_nickname, bot_statement.format(k = bot_nickname), bot_nickname)
-            # ignored_content.add(submission.replies[-1].id)
     logger.info(f"本轮检查结束，方法是 {method}。")
     i += 1
