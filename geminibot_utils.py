@@ -141,6 +141,8 @@ def check_ignored(content) -> bool:
         return True
     if content.author in blacklist:
         return True
+    if content.author == bot_name:
+        return True
     if type(content) == praw.models.reddit.submission.Submission:
         content.comments.replace_more(limit=0)
         for comment in content.comments:
@@ -203,7 +205,7 @@ def build_submission_context(submission, sub_user_nickname):
         # 限制内容长度；Python 切片不会索引越界
         context_str += f"，内容是“{submission.selftext[:6000]}”"
     context_str += "\n\n"
-    context_str += f"[system][#additional_instructions]\n吐槽时不要重复或仿写你打算吐槽的{sub_user_nickname}说过的话。不必介绍你自己，只输出你吐槽内容的正文。不要附上原文，不要输出所有可能的吐槽。" #todo add a first chat history append
+    context_str += f"[system][#additional_instructions]\n回复时不要重复或仿写你打算回复的{sub_user_nickname}说过的话。不必介绍你自己，只输出你回复内容的正文。不要附上原文，不要输出所有可能的回复。" #todo add a first chat history append
     return context_str
 
 
@@ -288,7 +290,7 @@ def build_comment_context(comment, ancestors, sub_user_nickname, bot_nickname, b
             context_str += comment.body + "(" + str(comment.score) + "点赞)" + "\n" #todo remove the comments of bots
 
     context_str += "\n\n"
-    context_str += f"[system][#additional_instructions]\n吐槽时不要重复或仿写你打算吐槽的{sub_user_nickname}说过的话。不必介绍你自己，只输出你吐槽的内容正文。不要附上原文，不要输出所有可能的吐槽。后续要求吐槽时，不要吐槽帖子本身，要吐槽{sub_user_nickname} {ancestor.author} 的最后一条评论:{ancestor.body}。" #todo add a first chat msg history append 
+    context_str += f"[system][#additional_instructions]\n回复时不要重复或仿写你打算回复的{sub_user_nickname}说过的话。不必介绍你自己，只输出你回复的内容正文。不要附上原文，不要输出所有可能的回复。后续要求回复时，不要回复帖子本身，要回复{sub_user_nickname} {ancestor.author} 的最后一条评论:{ancestor.body}。" #todo add a first chat msg history append 
     return context_str
 
 
@@ -465,10 +467,10 @@ def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nicknam
     try:
         if type(content) != praw.models.reddit.submission.Submission:
             if failed and not modified:
-                ask_string = f"请吐槽最后一条评论。只输出你吐槽的内容正文。不要排比，不要重复之前吐槽的内容或格式。"
+                ask_string = f"请回复最后一条评论。只输出你回复的内容正文。不要排比，不要重复之前回复的内容或格式。"
                 modified = True
             if failed and modified:
-                ask_string = f"请吐槽最后一条评论。只输出你吐槽的内容正文。"
+                ask_string = f"请回复最后一条评论。只输出你回复的内容正文。"
         persona, pre_reply = init_prompt_botstatement(sub_user_nickname, bot_nickname)
         model = genai.GenerativeModel(model_name="gemini-1.5-pro-latest", safety_settings=SAFETY_SETTINGS, system_instruction=persona + "\n\n" + context)
         gemini_messages = askbyuser(ask_string)
