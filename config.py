@@ -27,7 +27,7 @@ available_setting = {
     "random_check_rate" : 6,  # bot everytime when bot checks, how many check patterns would trigger the bot to reply randomly otherwise only reply when someone @ the bot
     "gemini_api_key": "",
     "persona": "",
-    "pre_reply": "",
+    "pre_reply": "",#not neccessary, cuz currently the img recognize function hasn't been implemented
     "customSet": [{'':''}],
     "bot_statement":"",
 
