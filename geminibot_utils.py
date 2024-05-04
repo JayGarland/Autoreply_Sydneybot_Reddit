@@ -289,7 +289,8 @@ def traverse_submissions(submission_list, method, bot_nickname):
     global ignored_content
     for submission in submission_list:
         if method == "random":
-            #  "preview.redd.it" in submission.selftext or
+            if "preview.redd.it" in submission.selftext:
+                continue
             if not submission.is_self or (len(submission.title) + len(submission.selftext)) <= min_char:
                 continue
             elif check_replied(submission):
