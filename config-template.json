@@ -9,7 +9,7 @@
     "blocked_account": [""],
     "TargetSubreddits":[""],
     "min_char" : 10,  
-    "interval" : 1,
+    "interval" : 4,
     "submission_num" : 10,
     "comment_num" : 30, 
     "comment_rate" : 0.7, 
