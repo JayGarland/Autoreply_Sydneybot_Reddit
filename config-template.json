@@ -1,0 +1,22 @@
+{
+    "bot_name": "",
+    "password" : "",
+    "client_id" : "",
+    "client_secret" : "",
+    "proxy" : "",
+    "bot_account": [],
+    "blacklist":[], 
+    "blocked_account": [""],
+    "TargetSubreddits":[""],
+    "min_char" : 10,  
+    "interval" : 1,
+    "submission_num" : 10,
+    "comment_num" : 30, 
+    "comment_rate" : 0.7, 
+    "random_check_rate" : 6,
+    "gemini_api_key": "",
+    "persona": "",
+    "pre_reply": "",
+    "customSet": [{"":""}],
+    "bot_statement":""
+}

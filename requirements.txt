@@ -1,2 +1,6 @@
-praw
-aiohttp
+bleach~=6.0.0
+praw~=7.7.0
+APScheduler~=3.10.1
+
+# if gemini-pro
+google-generativeai
