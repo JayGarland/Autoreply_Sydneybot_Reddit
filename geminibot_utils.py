@@ -428,11 +428,9 @@ def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nicknam
     logger.info(f"context: {context}")
     logger.info(f"ask_string: {ask_string}")
     logger.info(f"image: {visual_search_url}")
+    img = None
     if visual_search_url:
-        try:
-            img = get_image_from_url(visual_search_url)
-        except:
-            img = None
+        img = get_image_from_url(visual_search_url)
     
     try:
         persona = init_prompt_botstatement(sub_user_nickname, bot_nickname)
