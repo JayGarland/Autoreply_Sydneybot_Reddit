@@ -455,7 +455,7 @@ def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nicknam
                 ask_string = f"请回复最后一条评论。只输出你回复的内容正文。"
         persona, pre_reply = init_prompt_botstatement(sub_user_nickname, bot_nickname)
 
-        model = genai.GenerativeModel(model_name="gemini-1.5-pro-latest", safety_settings=SAFETY_SETTINGS, system_instruction=persona + "\n\n" + context)
+        model = genai.GenerativeModel(model_name="gemini-1.5-flash-latest", safety_settings=SAFETY_SETTINGS, system_instruction=persona + "\n\n" + context)
         gemini_messages = askbyuser(ask_string)
         response = model.generate_content(gemini_messages)
         reply_text = response.text
