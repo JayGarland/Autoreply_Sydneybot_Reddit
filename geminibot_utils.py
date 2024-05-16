@@ -8,8 +8,10 @@ from log import logger
 from config import load_config, conf
 import google.generativeai as genai
 from google.generativeai.types.safety_types import HarmCategory, HarmBlockThreshold
-import json
 import random
+import requests
+from PIL import Image
+from io import BytesIO
 
 load_config()
 bot_name = conf().get('bot_name')  # bot account
@@ -361,37 +363,18 @@ def detect_chinese_char_pair(context, threshold=5):
     # return False and None if no pair meets the threshold
     return False, None
 
-def construct_preset(sub_user_nickname, bot_nickname):
-    persona, pre_reply = init_prompt_botstatement(sub_user_nickname, bot_nickname)
-    res = []
-    res.append({
-            "role": "user",
-            "parts": [{"text": persona}]
-        })
-    res.append({
-            "role": "model",
-            "parts": [{"text": pre_reply}]
-        })
-    # logger.info(res)
-    return res
-
 def init_prompt_botstatement(sub_user_nickname, bot_nickname):
     persona = None
-    pre_reply = None
-    
     for setting_pairs in conf().get("customSet"):##TODO fix the Repeat same speech pattern as the last convo problem
         for key, cusprompt in dict(setting_pairs).items():
             if key == subreddit:
                 persona = cusprompt
-                pre_reply = setting_pairs["pre_reply"]
                 break
     if not persona:
         persona = conf().get("persona")
-        pre_reply = conf().get("pre_reply")
     persona = persona.format(n = sub_user_nickname, k = bot_nickname, m= subreddit)
-    pre_reply = pre_reply.format(n = sub_user_nickname, k = bot_nickname, m= subreddit)
     logger.info("PERSONA:" + persona)
-    return persona, pre_reply
+    return persona
 
 def askbyuser(ask_string):
     res = []
@@ -400,6 +383,11 @@ def askbyuser(ask_string):
             "parts": [{"text": ask_string}]
         })
     return res
+
+def get_image_from_url(url):
+    response = requests.get(url)
+    img = Image.open(BytesIO(response.content))
+    return img
 
 def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nickname, retry_count = 0):
     """This function takes a Reddit content (submission or comment), a context string and a method string as arguments.\n
@@ -440,23 +428,17 @@ def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nicknam
     logger.info(f"context: {context}")
     logger.info(f"ask_string: {ask_string}")
     logger.info(f"image: {visual_search_url}")
-
-    # Set the proxy string to localhost
-    proxy = conf().get('proxy')
-    failed = False # Initialize a failed flag to False
-    modified = False # Initialize a modified flag to False
+    try:
+        img = get_image_from_url(visual_search_url)
+    except:
+        img = None
     
     try:
-        if type(content) != praw.models.reddit.submission.Submission:
-            if failed and not modified:
-                ask_string = f"请回复最后一条评论。只输出你回复的内容正文。不要排比，不要重复之前回复的内容或格式。"
-                modified = True
-            if failed and modified:
-                ask_string = f"请回复最后一条评论。只输出你回复的内容正文。"
-        persona, pre_reply = init_prompt_botstatement(sub_user_nickname, bot_nickname)
-
-        model = genai.GenerativeModel(model_name="gemini-1.5-pro-latest", safety_settings=SAFETY_SETTINGS, system_instruction=persona + "\n\n" + context)
+        persona = init_prompt_botstatement(sub_user_nickname, bot_nickname)
+        model = genai.GenerativeModel(model_name="gemini-1.5-flash-latest", safety_settings=SAFETY_SETTINGS, system_instruction=persona + "\n\n" + context)
         gemini_messages = askbyuser(ask_string)
+        if visual_search_url:
+            gemini_messages = [ask_string, img]
         response = model.generate_content(gemini_messages)
         reply_text = response.text
         logger.info(reply_text)

@@ -16,7 +16,6 @@
     "random_check_rate" : 6,
     "gemini_api_key": "",
     "persona": "",
-    "pre_reply": "",
     "customSet": [{"":""}],
     "bot_statement":""
 }
