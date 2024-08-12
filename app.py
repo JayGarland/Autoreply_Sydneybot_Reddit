@@ -1,4 +1,4 @@
-from geminibot_utils import *
+from AIbot_utils import *
 import random
 import sys
 from apscheduler.schedulers.blocking import BlockingScheduler

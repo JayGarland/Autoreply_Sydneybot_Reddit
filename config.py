@@ -26,6 +26,7 @@ available_setting = {
     "comment_rate" : 0.7,  # every pattern when triggered the reply randomly, how much rate of the bot choose to reply the comment under a post, if not, reply to a post
     "random_check_rate" : 6,  # bot everytime when bot checks, how many check patterns would trigger the bot to reply randomly otherwise only reply when someone @ the bot
     "gemini_api_key": "",
+    "cohere_api_key": "",
     "persona": "",
     "customSet": [{'':''}],
     "bot_statement":"",

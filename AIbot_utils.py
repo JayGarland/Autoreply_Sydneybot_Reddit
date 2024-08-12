@@ -6,12 +6,9 @@ import bleach
 import re
 from log import logger
 from config import load_config, conf
-import google.generativeai as genai
-from google.generativeai.types.safety_types import HarmCategory, HarmBlockThreshold
+import cohere
 import random
 import requests
-from PIL import Image
-from io import BytesIO
 
 load_config()
 bot_name = conf().get('bot_name')  # bot account
@@ -58,7 +55,6 @@ def init():
     global ignore_name_list
     global blacklist
     global random_subReddit
-    global SAFETY_SETTINGS
 
     reddit = praw.Reddit(client_id=client_id, client_secret=client_secret, password=password, user_agent=user_agent, username=bot_name)
     random_subReddit = random.choice(subreddit_names)
@@ -71,13 +67,6 @@ def init():
     if os.path.exists(pickle_path):
         with open(pickle_path, "rb") as pkl:
             ignored_content = pickle.load(pkl)
-
-    SAFETY_SETTINGS = {
-        HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
-        HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-        HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
-        HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
-    }
 
 
 # 从当前评论开始循环查找上级评论，直至找到主贴
@@ -429,16 +418,19 @@ def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nicknam
     logger.info(f"ask_string: {ask_string}")
     logger.info(f"image: {visual_search_url}")
     img = None
-    if visual_search_url:
-        img = get_image_from_url(visual_search_url)
+    # if visual_search_url:
+    #     img = get_image_from_url(visual_search_url)
     
     try:
         persona = init_prompt_botstatement(sub_user_nickname, bot_nickname)
-        model = genai.GenerativeModel(model_name="gemini-1.5-flash-latest", safety_settings=SAFETY_SETTINGS, system_instruction=persona + "\n\n" + context)
-        gemini_messages = ask_string
+        query = ask_string
         if img:
-            gemini_messages = [ask_string, img]
-        response = model.generate_content(gemini_messages)
+            query = [ask_string, img]
+        pageinfo = [{
+            "role": "SYSTEM",
+            "message": context
+            }]
+        response = co.chat(message=query, preamble=persona, chat_history = pageinfo, temperature=0.8)
         reply_text = response.text
         logger.info(reply_text)
         if "要和我对话请在发言中带上" not in reply_text:
@@ -454,13 +446,13 @@ def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nicknam
 
 @staticmethod
 def GeminiApiConfig():
-    keys = conf().get("gemini_api_key")
+    keys = conf().get("cohere_api_key")
     keys = keys.split("|")
     keys = [key.strip() for key in keys]
     if not keys:
         raise Exception("Please set a valid API key in Config!")
     api_key = random.choice(keys)
-    genai.configure(api_key=api_key)
+    return cohere.Client(api_key=api_key)
 
 def task():
     global i
@@ -473,8 +465,8 @@ def task():
             bot_nickname = reddit[random_subReddit]["bot_nickname"]
             sub_user_nickname = reddit[random_subReddit]["sub_user_nickname"]
             break
-
-    GeminiApiConfig()
+    global co
+    co = GeminiApiConfig()
 
     if random_check_rate == 0:
         method = "at_me"
