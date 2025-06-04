@@ -37,7 +37,8 @@ available_setting = {
     "appdata_dir": "",  # date dir
     "ai_model": "AZURE",  # default ai model, can be "gemini", "cohere", "deepseek", "azure"
     "azure_endpoint": "https://redditreplybot.services.ai.azure.com/models",
-    "azure_key": ""
+    "azure_key": "",
+    "azure_deployment": ""
 }
 
 
