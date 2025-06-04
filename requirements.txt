@@ -1,12 +1,23 @@
+# Core dependencies
 bleach~=6.0.0
 praw~=7.7.0
 APScheduler~=3.10.1
-aiofiles~=23.1.0
+aiofiles~=24.1.0
 aiohttp~=3.8.4
-httpx~=0.24.1
+httpx~=0.28.1
 BingImageCreator~=0.4.2
-rich~=13.4.1
+rich~=14.0.0
 emoji~=2.6.0
 
-# if gemini-pro
-google-generativeai
+# Azure AI Inference (for ai_model: AZURE)
+azure-ai-inference~=1.0.0b7
+azure-core~=1.30.1
+
+# Cohere (for ai_model: COHERE)
+cohere~=5.3.3
+
+# DeepSeek (for ai_model: DEEPSEEK, OpenAI compatible)
+openai~=1.30.1
+
+# Gemini (for ai_model: GEMINI)
+google-generativeai~=0.5.4

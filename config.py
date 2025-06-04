@@ -27,6 +27,7 @@ available_setting = {
     "random_check_rate" : 6,  # bot everytime when bot checks, how many check patterns would trigger the bot to reply randomly otherwise only reply when someone @ the bot
     "gemini_api_key": "",
     "cohere_api_key": "",
+    "deepseek_api_key": "",
     "persona": "",
     "customSet": [{'':''}],
     "bot_statement":"",
@@ -34,6 +35,9 @@ available_setting = {
     #system config 
     "debug":"",
     "appdata_dir": "",  # date dir
+    "ai_model": "AZURE",  # default ai model, can be "gemini", "cohere", "deepseek", "azure"
+    "azure_endpoint": "https://redditreplybot.services.ai.azure.com/models",
+    "azure_key": ""
 }
 
 

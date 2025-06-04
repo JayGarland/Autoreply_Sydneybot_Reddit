@@ -9,6 +9,9 @@ from config import load_config, conf
 import cohere
 import random
 import requests
+from io import BytesIO
+from PIL import Image
+
 
 load_config()
 bot_name = conf().get('bot_name')  # bot account
@@ -361,8 +364,14 @@ def init_prompt_botstatement(sub_user_nickname, bot_nickname):
                 break
     if not persona:
         persona = conf().get("persona")
-    persona = persona.format(n = sub_user_nickname, k = bot_nickname, m= subreddit)
-    logger.info("PERSONA:" + persona)
+    try:
+        persona = persona.format(n=sub_user_nickname, k=bot_nickname, m=subreddit)
+    except ValueError as e:
+        logger.warning(str(e))
+        # Escape all single braces to avoid format errors
+        persona = persona.replace('{', '{{').replace('}', '}}')
+        persona = persona.format(n=sub_user_nickname, k=bot_nickname, m=subreddit)
+    logger.debug("PERSONA:" + persona)
     return persona
 
 def askbyuser(ask_string):
@@ -430,8 +439,35 @@ def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nicknam
             "role": "SYSTEM",
             "message": context
             }]
-        response = co.chat(message=query, preamble=persona, chat_history = pageinfo, temperature=0.8)
-        reply_text = response.text
+        # Dynamic LLM call
+        if ai_model == 'COHERE':
+            response = client.chat(message=query, preamble=persona, chat_history=pageinfo, temperature=0.7)
+            reply_text = response.text
+        elif ai_model == 'DEEPSEEK':
+            # DeepSeek (OpenAI compatible)
+            messages = [
+                {"role": "system", "content": persona + context},
+                {"role": "user", "content":  ask_string}
+            ]
+            completion = client.chat.completions.create(
+                model="deepseek-reasoner",
+                messages=messages,
+                temperature=0.7
+            )
+            reply_text = completion.choices[0].message.content
+            reply_text = re.sub(r'<think>.*?</think>', '', reply_text, flags=re.DOTALL).strip()
+        elif ai_model == 'GEMINI':
+            # Gemini (google-generativeai)
+            model = client.GenerativeModel('gemini-pro')
+            convo = model.start_chat(history=[])
+            gemini_prompt = persona + "\n" + context + "\n" + ask_string
+            gemini_response = convo.send_message(gemini_prompt)
+            reply_text = gemini_response.text
+        elif ai_model == 'AZURE':
+            azure_reply(content, context, sub_user_nickname, bot_statement, bot_nickname, retry_count)
+            return
+        else:
+            raise Exception(f"Unknown ai_model: {ai_model}")
         logger.info(reply_text)
         if "要和我对话请在发言中带上" not in reply_text:
             reply_text += bot_statement
@@ -444,15 +480,74 @@ def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nicknam
         logger.warning(e)
         sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nickname, retry_count +1)
 
-@staticmethod
-def GeminiApiConfig():
-    keys = conf().get("cohere_api_key")
-    keys = keys.split("|")
-    keys = [key.strip() for key in keys]
-    if not keys:
-        raise Exception("Please set a valid API key in Config!")
-    api_key = random.choice(keys)
-    return cohere.Client(api_key=api_key)
+ai_model = conf().get('ai_model', 'DEEPSEEK').upper()
+
+def get_llm_client():
+    if ai_model == 'COHERE':
+        keys = conf().get('cohere_api_key')
+        keys = keys.split("|")
+        keys = [key.strip() for key in keys]
+        if not keys:
+            raise Exception("Please set a valid Cohere API key in Config!")
+        api_key = random.choice(keys)
+        return cohere.Client(api_key=api_key)
+    elif ai_model == 'DEEPSEEK':
+        from openai import OpenAI
+        keys = conf().get("deepseek_api_key")
+        keys = keys.split("|")
+        keys = [key.strip() for key in keys]
+        if not keys:
+            raise Exception("Please set a valid DeepSeek API key in Config!")
+        api_key = random.choice(keys)
+        return OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+    elif ai_model == 'GEMINI':
+        import google.generativeai as genai
+        keys = conf().get("gemini_api_key")
+        keys = keys.split("|")
+        keys = [key.strip() for key in keys]
+        if not keys:
+            raise Exception("Please set a valid Gemini API key in Config!")
+        api_key = random.choice(keys)
+        genai.configure(api_key=api_key)
+        return genai
+    elif ai_model == 'AZURE':
+        # Azure OpenAI/Inference
+        return None  # Client is handled in azure_reply
+    else:
+        raise Exception(f"Unknown ai_model: {ai_model}")
+
+def azure_reply(content, context, sub_user_nickname, bot_statement, bot_nickname, retry_count = 0):
+    """
+    Generate a reply using Azure AI Inference and post to Reddit.
+    """
+    from azure_inference import azure_generate_reply
+    if retry_count > 3:
+        logger.error("Failed after maximum number of retry times (Azure)")
+        return
+    context = bleach.clean(context).strip()
+    context = "<|im_start|>system\n\n" + context
+    if type(content) == praw.models.reddit.submission.Submission:
+        ask_string = f"{bot_nickname}请回复前述{content.author}的帖子。"
+    else:
+        ask_string = f"{bot_nickname}请回复{sub_user_nickname} {content.author} 的最后一条评论。不必介绍你自己，只输出你回复的内容正文。不要排比，不要重复之前回复的内容或格式。"
+    ask_string = bleach.clean(ask_string).strip()
+    logger.info(f"[AZURE] context: {context}")
+    logger.info(f"[AZURE] ask_string: {ask_string}")
+    try:
+        persona = init_prompt_botstatement(sub_user_nickname, bot_nickname)
+        system_prompt = persona + context
+        user_prompt = ask_string
+        reply_text = azure_generate_reply(system_prompt, user_prompt)
+        logger.info(reply_text)
+        if "要和我对话请在发言中带上" not in reply_text:
+            reply_text += bot_statement
+        content.reply(reply_text)
+        return
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        logger.warning(e)
+        azure_reply(content, context, sub_user_nickname, bot_statement, bot_nickname, retry_count + 1)
 
 def task():
     global i
@@ -465,8 +560,8 @@ def task():
             bot_nickname = reddit[random_subReddit]["bot_nickname"]
             sub_user_nickname = reddit[random_subReddit]["sub_user_nickname"]
             break
-    global co
-    co = GeminiApiConfig()
+    global client
+    client = get_llm_client()
 
     if random_check_rate == 0:
         method = "at_me"
