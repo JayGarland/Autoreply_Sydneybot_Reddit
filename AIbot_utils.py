@@ -26,7 +26,7 @@ subreddit_names =  [list(targetSubreddits[i].keys())[0] for i in range(len(targe
 
 
 min_char = conf().get('min_char')  # at least how many word in user's speech will trigger the bot reply
-interval = conf().get('interval') # check every interval minute
+interval = conf().get('interval') # check randomly in every max interval minute
 submission_num = conf().get('submission_num')  # everytime bot observe how many posts
 comment_num = conf().get('comment_num')  # every pattern when triggered the reply randomly, how many replies will be pulled and let the bot observe
 comment_rate = conf().get('comment_rate')  # every pattern when triggered the reply randomly, how much rate of the bot choose to reply the comment under a post, if not, reply to a post
