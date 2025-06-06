@@ -8,3 +8,5 @@ __pycache__/
 
 config.json
 run.log
+/subreddit_style_prompt_workflow/data
+/personas

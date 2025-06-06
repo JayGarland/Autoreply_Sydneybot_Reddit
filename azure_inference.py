@@ -6,11 +6,11 @@ from azure.core.credentials import AzureKeyCredential
 from config import logger, conf
 
 endpoint = conf().get("azure_endpoint", "https://redditreplybot.services.ai.azure.com/models")
-key = conf().get("azure_key", "YOUR_KEY_HERE")
+key = conf().get("azure_key")
 deployment_name = conf().get("azure_deployment", "DeepSeek-R1-2")
 client = ChatCompletionsClient(endpoint=endpoint, credential=AzureKeyCredential(key))
 
-def azure_generate_reply(system_prompt, user_prompt, max_tokens=2048, model=None):
+def azure_generate_reply(system_prompt, user_prompt, max_tokens=4096, model=None):
     """
     Generate a reply using Azure AI Inference.
     :param system_prompt: The system prompt string (persona, rules, etc)

@@ -191,3 +191,6 @@ def pconf(plugin_name: str) -> dict:
 global_config = {
     "admin_users": []
 }
+
+# Ensure config is loaded when this module is imported
+load_config()

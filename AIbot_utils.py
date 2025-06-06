@@ -13,7 +13,7 @@ from io import BytesIO
 from PIL import Image
 
 
-load_config()
+# load_config()
 bot_name = conf().get('bot_name')  # bot account
 password = conf().get('password') # bot pswd
 client_id = conf().get('client_id') # api id
@@ -355,12 +355,17 @@ def detect_chinese_char_pair(context, threshold=5):
     # return False and None if no pair meets the threshold
     return False, None
 
-def init_prompt_botstatement(sub_user_nickname, bot_nickname):
+def init_systemprompt_bot(sub_user_nickname, bot_nickname):
     persona = None
-    for setting_pairs in conf().get("customSet"):##TODO fix the Repeat same speech pattern as the last convo problem
+    for setting_pairs in conf().get("customSet"):  # customSet is now a list of dicts with file paths
         for key, cusprompt in dict(setting_pairs).items():
             if key == subreddit:
-                persona = cusprompt
+                # If cusprompt is a file path and exists, read the file
+                if isinstance(cusprompt, str) and os.path.isfile(cusprompt):
+                    with open(cusprompt, 'r', encoding='utf-8') as f:
+                        persona = f.read()
+                else:
+                    persona = cusprompt
                 break
     if not persona:
         persona = conf().get("persona")
@@ -431,7 +436,7 @@ def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nicknam
     #     img = get_image_from_url(visual_search_url)
     
     try:
-        persona = init_prompt_botstatement(sub_user_nickname, bot_nickname)
+        persona = init_systemprompt_bot(sub_user_nickname, bot_nickname)
         query = ask_string
         if img:
             query = [ask_string, img]
@@ -534,7 +539,7 @@ def azure_reply(content, context, sub_user_nickname, bot_statement, bot_nickname
     logger.info(f"[AZURE] context: {context}")
     logger.info(f"[AZURE] ask_string: {ask_string}")
     try:
-        persona = init_prompt_botstatement(sub_user_nickname, bot_nickname)
+        persona = init_systemprompt_bot(sub_user_nickname, bot_nickname)
         system_prompt = persona + context
         user_prompt = ask_string
         reply_text = azure_generate_reply(system_prompt, user_prompt)
