@@ -44,10 +44,11 @@ ignore_name_list = None
 blacklist = None  # if anyone in the blacklist, the bot will not reply to the whom included whatsoever
 
 bot_statement = conf().get("bot_statement")
+ai_model     = conf().get("ai_model")
 ignored_content = set()
-pickle_path = "./replied.pkl"
+pickle_path      = "./replied.pkl"
 archived_pickle_path = "./replied.pkl.arc"
-
+client = None
 i = 1
 
 def init():
@@ -394,135 +395,81 @@ def get_image_from_url(url):
     img = Image.open(BytesIO(response.content))
     return img
 
-def sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nickname, retry_count = 0):
-    """This function takes a Reddit content (submission or comment), a context string and a method string as arguments.\n
-    It uses the sydney module to generate a reply for the content based on the context and the method.\n
-    It returns if there is an error or a CAPTCHA, otherwise it posts the reply to Reddit"""
-    
-    if retry_count > 3:
-        logger.error("Failed after maximum number of retry times")
+def generate_reply(content, context, sub_user_nickname, bot_statement, bot_nickname, retry_count=0):
+    """Generate and post a reply using the configured LLM client."""
+    MAX_RETRIES = 3
+    if retry_count > MAX_RETRIES:
+        logger.error(f"Failed after maximum retry attempts ({MAX_RETRIES})")
         return
 
-    # Clean the context string using bleach
-    context = bleach.clean(context).strip()
-    # Add the system tag to the context string
-    # context = context + f"\n\n[user](#message)\n你好\n\n[assistant](#message)\n你好，我是{bot_nickname}，一个抑郁到不想活但幽默感爆棚的{sub_user_nickname}。很高兴认识你，想和我聊些什么吗？\n\n"
-    context = "<|im_start|>system\n\n" + context
-    # Check the type of the content argument
-    if type(content) == praw.models.reddit.submission.Submission:
-        # If the content is a submission, set the ask string to reply to the submission
-        ask_string = f"{bot_nickname}请回复前述{content.author}的帖子。"
-        if hasattr(content, 'url') and content.url.endswith((".jpg", ".png", ".jpeg", ".gif")):
-            visual_search_url = content.url
-        else:
-            visual_search_url = None
-    else:
-        # If the content is a comment, set the ask string to reply to the last comment
-        # Also specify not to repeat or use parallelism in the reply
-        ask_string = f"{bot_nickname}请回复{sub_user_nickname} {content.author} 的最后一条评论。不必介绍你自己，只输出你回复的内容正文。不要排比，不要重复之前回复的内容或格式。"
-        if '<img' in content.body_html:
-            # Find the image source URL by parsing the html body
-            img_src = re.search(r'<img src="(.+?)"', content.body_html).group(1)
-            visual_search_url = img_src
-        elif hasattr(content.submission, 'url') and content.submission.url.endswith((".jpg", ".png", ".jpeg", ".gif")):
-            visual_search_url = content.submission.url
-        else:
-            visual_search_url = None
+    # prepend system tag and clean
+    context = "<|im_start|>system\n\n" + bleach.clean(context).strip()
 
-    ask_string = bleach.clean(ask_string).strip()
+    # build ask prompt and optional image URL
+    is_sub = isinstance(content, praw.models.reddit.submission.Submission)
+    if is_sub:
+        ask = f"{bot_nickname}请回复前述{content.author}的帖子。"
+        img_url = content.url if getattr(content, "url", "").lower().endswith((".jpg", ".png", ".jpeg", ".gif")) else None
+    else:
+        ask = (
+            f"{bot_nickname}请回复{sub_user_nickname} {content.author} 的最后一条评论。"
+            " 不必介绍你自己，只输出你回复内容的正文。不要排比，不要重复之前回复的内容或格式。"
+        )
+        img_url = None
+        if hasattr(content, "body_html"):
+            m = re.search(r'<img src="(.+?)"', content.body_html)
+            if m:
+                img_url = m.group(1)
+        if not img_url and hasattr(content, "submission"):
+            sub_url = getattr(content.submission, "url", "")
+            if sub_url.lower().endswith((".jpg", ".png", ".jpeg", ".gif")):
+                img_url = sub_url
+
+    ask = bleach.clean(ask).strip()
     logger.info(f"context: {context}")
-    logger.info(f"ask_string: {ask_string}")
-    logger.info(f"image: {visual_search_url}")
-    img = None
-    # if visual_search_url:
-    #     img = get_image_from_url(visual_search_url)
-    
+    logger.info(f"ask: {ask}")
+    logger.info(f"image: {img_url or 'None'}")
+
     try:
         persona = init_systemprompt_bot(sub_user_nickname, bot_nickname)
-        query = ask_string
-        if img:
-            query = [ask_string, img]
-        pageinfo = [{
-            "role": "SYSTEM",
-            "message": context
-            }]
-        # Dynamic LLM call
+        messages = [{"role": "SYSTEM", "content": context}]
+        query = ask if not img_url else [ask, get_image_from_url(img_url)]
+
         if ai_model == 'COHERE':
-            response = client.chat(message=query, preamble=persona, chat_history=pageinfo, temperature=0.7)
-            reply_text = response.text
+            resp = client.chat(message=query, preamble=persona, chat_history=messages, temperature=0.7)
+            reply = resp.text
         elif ai_model == 'DEEPSEEK':
-            # DeepSeek (OpenAI compatible)
-            messages = [
+            msgs = [
                 {"role": "system", "content": persona + context},
-                {"role": "user", "content":  ask_string}
+                {"role": "user",   "content": ask}
             ]
-            completion = client.chat.completions.create(
+            comp = client.chat.completions.create(
                 model="deepseek-reasoner",
-                messages=messages,
+                messages=msgs,
                 temperature=0.7
             )
-            reply_text = completion.choices[0].message.content
-            reply_text = re.sub(r'<think>.*?</think>', '', reply_text, flags=re.DOTALL).strip()
+            reply = re.sub(r'<think>.*?</think>', '', comp.choices[0].message.content, flags=re.DOTALL).strip()
         elif ai_model == 'GEMINI':
-            # Gemini (google-generativeai)
-            model = client.GenerativeModel('gemini-pro')
+            model = client.GenerativeModel("gemini-pro")
             convo = model.start_chat(history=[])
-            gemini_prompt = persona + "\n" + context + "\n" + ask_string
-            gemini_response = convo.send_message(gemini_prompt)
-            reply_text = gemini_response.text
+            reply = convo.send_message(persona + "\n" + context + "\n" + ask).text
         elif ai_model == 'AZURE':
             azure_reply(content, context, sub_user_nickname, bot_statement, bot_nickname, retry_count)
             return
         else:
-            raise Exception(f"Unknown ai_model: {ai_model}")
-        logger.info(reply_text)
-        if "要和我对话请在发言中带上" not in reply_text:
-            reply_text += bot_statement
-        content.reply(reply_text)            
-        return   
+            raise ValueError(f"Unsupported AI model: {ai_model}")
+
+        # ensure bot_statement is appended
+        if bot_statement.strip() not in reply:
+            reply = reply.rstrip() + "\n\n" + bot_statement
+
+        content.reply(reply)
 
     except Exception as e:
-        import traceback
-        traceback.print_exc()
-        logger.warning(e)
-        sydney_reply(content, context, sub_user_nickname, bot_statement, bot_nickname, retry_count +1)
+        logger.warning(f"generate_reply error ({retry_count + 1}/{MAX_RETRIES}): {e}")
+        generate_reply(content, context, sub_user_nickname, bot_statement, bot_nickname, retry_count + 1)
 
-ai_model = conf().get('ai_model', 'DEEPSEEK').upper()
-
-def get_llm_client():
-    if ai_model == 'COHERE':
-        keys = conf().get('cohere_api_key')
-        keys = keys.split("|")
-        keys = [key.strip() for key in keys]
-        if not keys:
-            raise Exception("Please set a valid Cohere API key in Config!")
-        api_key = random.choice(keys)
-        return cohere.Client(api_key=api_key)
-    elif ai_model == 'DEEPSEEK':
-        from openai import OpenAI
-        keys = conf().get("deepseek_api_key")
-        keys = keys.split("|")
-        keys = [key.strip() for key in keys]
-        if not keys:
-            raise Exception("Please set a valid DeepSeek API key in Config!")
-        api_key = random.choice(keys)
-        return OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
-    elif ai_model == 'GEMINI':
-        import google.generativeai as genai
-        keys = conf().get("gemini_api_key")
-        keys = keys.split("|")
-        keys = [key.strip() for key in keys]
-        if not keys:
-            raise Exception("Please set a valid Gemini API key in Config!")
-        api_key = random.choice(keys)
-        genai.configure(api_key=api_key)
-        return genai
-    elif ai_model == 'AZURE':
-        # Azure OpenAI/Inference
-        return None  # Client is handled in azure_reply
-    else:
-        raise Exception(f"Unknown ai_model: {ai_model}")
-
+# (no alias needed)
 def azure_reply(content, context, sub_user_nickname, bot_statement, bot_nickname, retry_count = 0):
     """
     Generate a reply using Azure AI Inference and post to Reddit.
@@ -567,8 +514,6 @@ def task():
             bot_nickname = reddit[random_subReddit]["bot_nickname"]
             sub_user_nickname = reddit[random_subReddit]["sub_user_nickname"]
             break
-    global client
-    client = get_llm_client()
 
     if random_check_rate == 0:
         method = "at_me"
@@ -589,11 +534,11 @@ def task():
         comment, ancestors = traverse_comments(comment_list=comment_list, method=method, bot_nickname=bot_callname)
         if comment is not None:
             context_str += build_comment_context(comment, ancestors, sub_user_nickname, bot_nickname, bot_name)
-            sydney_reply(comment, context_str, sub_user_nickname, bot_statement.format(k = bot_nickname), bot_nickname)
+            generate_reply(comment, context_str, sub_user_nickname, bot_statement.format(k=bot_nickname), bot_nickname)
     if comment is None:
         submission = traverse_submissions(submission_list=submission_list, method=method, bot_nickname=bot_callname)
         if submission is not None:
             context_str += build_submission_context(submission, sub_user_nickname)
-            sydney_reply(submission, context_str, sub_user_nickname, bot_statement.format(k = bot_nickname), bot_nickname)
+            generate_reply(submission, context_str, sub_user_nickname, bot_statement.format(k=bot_nickname), bot_nickname)
     logger.info(f"本轮检查结束，方法是 {method}。")
     i += 1

@@ -10,7 +10,7 @@ key = conf().get("azure_key")
 deployment_name = conf().get("azure_deployment", "DeepSeek-R1-2")
 client = ChatCompletionsClient(endpoint=endpoint, credential=AzureKeyCredential(key))
 
-def azure_generate_reply(system_prompt, user_prompt, max_tokens=4096, model=None):
+def azure_generate_reply(system_prompt, user_prompt, max_tokens=8192, model=None):
     """
     Generate a reply using Azure AI Inference.
     :param system_prompt: The system prompt string (persona, rules, etc)
@@ -19,6 +19,7 @@ def azure_generate_reply(system_prompt, user_prompt, max_tokens=4096, model=None
     :param model: Model/deployment name (optional)
     :return: The generated reply string
     """
+    logger.info(f"[persona]:" + system_prompt)
     response = client.complete(
         messages=[
             SystemMessage(content=system_prompt),
