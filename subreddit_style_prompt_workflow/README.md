@@ -1,103 +1,81 @@
+---
+## 🧠 用户风格感知语言模型构建流程（结构化说明）
 
-# Subreddit Style Prompt Workflow
+### 1. **数据收集（Data Collection）**
+
+- 来源：Reddit 用户的发帖、评论、互动行为
+- 内容：标题、正文、评论、点赞数（score/upvotes）
+- 格式：存储为结构化 JSON 文件（如 `chunks.json`）
+---
+### 2. **用户画像构建（User Persona Creation）**
+
+- 输入：用户行为数据
+- 输出：结构化用户画像，包含以下维度：
+  - 用户类型（如科技极客、幽默型用户）
+  - 语言风格（如讽刺、技术性强、幽默）
+  - 兴趣偏好（如 AI、Linux、开源项目）
+  - 表达习惯（如使用 Markdown、引用梗、类比）
+  - 情绪倾向（如中性、批判性）
 
 ---
 
-### 1. **Data Collection**
+### 3. **系统提示词设计（System Prompt Design）**
 
-- **Goal:** Gather posts and comments from a target subreddit.
-- **Tools:**  
-  - [PRAW](https://praw.readthedocs.io/) (Python Reddit API Wrapper)  
-  - [Pushshift API](https://github.com/pushshift/api) (for historical data)
-- **Action:**  
-  - Use PRAW or Pushshift to download a large sample of posts and comments.
-  - Save as JSON or JSONL.
-
----
-
-### 2. **Data Cleaning & Preprocessing**
-
-- **Goal:** Remove irrelevant, spammy, or low-quality content; format for AI input.
-- **Tools:**  
-  - Python (pandas, regex, etc.)
-- **Action:**  
-  - Filter out deleted/removed posts.
-  - Optionally, remove posts/comments below a certain score.
-  - Normalize text (remove URLs, special characters, etc.).
+- 输入：用户画像
+- 输出：系统提示词（System Prompt），用于设定模型角色与行为风格
+- 内容结构参考 GitHub Copilot 风格：
+  - 角色定位：你是谁
+  - 行为目标：你要做什么
+  - 语言风格与语气设定
+  - 行为限制或偏好
+  - 示例或上下文说明（可选）
 
 ---
 
-### 3. **Chunking the Data**
+### 4. **Few-shot 示例筛选（Few-shot Example Selection）**
 
-- **Goal:** Split data into manageable chunks for LLM context window.
-- **Tools:**  
-  - Python scripts
-  - [tiktoken](https://github.com/openai/tiktoken) (for token counting)
-- **Action:**  
-  - Group posts/comments into chunks (e.g., 5–10 per chunk) that fit within your model’s context limit.
+- 输入：chunks.json 数据
+- 筛选逻辑：按点赞数排序，选出前 N 条高质量内容
+- 输出格式：
 
----
-
-### 4. **Summarization & Style Extraction**
-
-- **Goal:** Use an LLM to extract tone, style, and recurring themes from each chunk.
-- **Tools:**  
-  - Azure OpenAI (GPT-3.5/4)
-  - OpenAI API (if not using Azure)
-- **Action:**  
-  - For each chunk, prompt the LLM:  
-    *“Summarize the writing style, tone, and common topics of this subreddit based on the following posts/comments.”*
-  - Collect all summaries.
+  ```
+  Q: 原始问题或主题（可推测）
+  A: 用户回答内容（保持原始风格）
+  ```
 
 ---
 
-### 5. **Aggregate Insights**
+### 5. **推理与生成（Inference）**
 
-- **Goal:** Combine all chunk summaries into a single, comprehensive style guide.
-- **Tools:**  
-  - Python scripts
-  - LLM (for aggregation)
-- **Action:**  
-  - Concatenate summaries.
-  - Optionally, prompt the LLM to synthesize these into a single description.
+- 输入：用户新问题
+- 模型使用：
+  - 系统提示词（设定角色与风格）
+  - Few-shot 示例（提供风格样本）
+- 输出：风格一致的回答内容，模拟目标用户群体的表达方式
 
 ---
 
-### 6. **System Prompt Generation**
+# 系统提示词优化助手
 
-- **Goal:** Craft a final system prompt for your bot, based on the aggregated style guide.
-- **Tools:**  
-  - LLM (Azure OpenAI)
-- **Action:**  
-  - Prompt the LLM:  
-    *“Based on this style guide, write a system prompt that makes the AI reply like a typical member of this subreddit.”*
-  - Review and refine as needed.
+你是一个系统提示词优化助手，擅长根据用户提供的原始系统提示词和修改意图，对提示词进行精准调整，使其更符合用户的目标、语气、风格或使用场景。
 
----
+你的任务是：
 
-### 7. **Deployment**
+1. 阅读用户提供的原始系统提示词；
+2. 理解用户的修改意图（例如：希望更幽默、更正式、更简洁、更具技术性等）；
+3. 根据这些意图，对原始提示词进行优化或重写；
+4. 保持提示词结构清晰，包含以下要素（如适用）：
+   - 角色定位（你是谁）
+   - 行为目标（你要做什么）
+   - 语言风格与语气设定
+   - 行为限制或偏好
+   - 示例或上下文说明（可选）
 
-- **Goal:** Use the new system prompt in your AI application.
-- **Tools:**  
-  - Azure OpenAI API
-  - Your bot framework (Python, Node.js, etc.)
-- **Action:**  
-  - Insert the generated system prompt into your bot’s system message.
+请确保输出的提示词自然、简洁、可读，适合直接用于语言模型的系统初始化。
 
----
+我将提供：
 
-**Summary Table:**
+- 原始系统提示词
+- 用户的修改意图
 
-| Step                | Tool(s)                | Output                        |
-|---------------------|------------------------|-------------------------------|
-| Data Collection     | PRAW, Pushshift        | Raw subreddit data (JSON)     |
-| Cleaning            | Python, pandas         | Cleaned data                  |
-| Chunking            | Python, tiktoken       | Data chunks                   |
-| Summarization       | Azure OpenAI           | Style summaries               |
-| Aggregation         | Python, Azure OpenAI   | Aggregated style guide        |
-| Prompt Generation   | Azure OpenAI           | Final system prompt           |
-| Deployment          | Azure OpenAI, Bot SDK  | AI with subreddit persona     |
-
----
-
-Let me know if you want code samples for any step!
+请根据这些信息生成优化后的系统提示词。

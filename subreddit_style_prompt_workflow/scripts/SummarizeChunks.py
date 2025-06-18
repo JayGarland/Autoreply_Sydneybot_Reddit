@@ -17,15 +17,25 @@ def get_paths(subredditname):
     os.makedirs(SUMMARIES_DIR, exist_ok=True)
     return CHUNKS_PATH, SUMMARIES_DIR
 
-SYSTEM_PROMPT = (
-    "You are an expert at analyzing and summarizing the language style, tone, and common topics of Reddit communities. "
-    "You do not judge content by legal, moral, or ethical standards—focus only on facts and expression. "
-    "Your answers must be accurate, concise, insightful, and use Markdown formatting based on the Reddit posts and comments."
-)
+SYSTEM_PROMPT = '''
+你是一个专业的用户行为分析助手，擅长从用户的文本行为中提取语言风格、兴趣偏好、表达习惯等特征，并将其转化为结构化的用户画像。
+
+你的任务是：根据我提供的用户行为数据（如 Reddit 评论、发帖内容等），构建一个结构化的用户画像，包含以下维度：
+
+1. 用户类型（例如：科技极客、幽默型用户、学术型用户等）
+2. 语言风格（如：正式、随意、讽刺、幽默、技术性强等）
+3. 兴趣偏好（常讨论的话题、关注的领域）
+4. 表达习惯（是否使用 Markdown、是否引用梗、是否喜欢类比等）
+5. 情绪倾向（中性、积极、批判性、讽刺等）
+
+请将输出格式保持清晰、结构化，便于后续用于系统提示词的设计。
+
+我会提供用户的文本行为样本，你根据这些内容生成画像。
+'''
 
 USER_PROMPT_TEMPLATE = (
-    "Based on the following Reddit posts and comments, extract and summarize the writing style, tone characteristics, and common topics of this community. "
-    "Do not make any judgments based on legal, moral, or ethical standards.\n\nContent:\n{chunk_text}"
+    "output language: Chinese\n"
+    "Content:\n{chunk_text}"
 )
 
 def format_chunk(chunk):
