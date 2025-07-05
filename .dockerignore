@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.pkl
+*.log
+*.jpg
+*.png
+.vscode/
+.git/
