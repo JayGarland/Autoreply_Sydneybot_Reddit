@@ -78,7 +78,13 @@ class Config(dict):
 
     def load_user_datas(self):
         try:
-            with open(os.path.join(get_appdata_dir(), "user_datas.pkl"), "rb") as f:
+            # Get data path using this config instance to avoid circular dependency
+            data_dir = self.get("appdata_dir", "")
+            data_path = os.path.join(get_root(), data_dir)
+            if not os.path.exists(data_path):
+                os.makedirs(data_path)
+            
+            with open(os.path.join(data_path, "user_datas.pkl"), "rb") as f:
                 self.user_datas = pickle.load(f)
                 logger.info("[Config] User datas loaded.")
         except FileNotFoundError as e:
@@ -89,52 +95,106 @@ class Config(dict):
 
     def save_user_datas(self):
         try:
-            with open(os.path.join(get_appdata_dir(), "user_datas.pkl"), "wb") as f:
+            # Get data path using this config instance to avoid circular dependency
+            data_dir = self.get("appdata_dir", "")
+            data_path = os.path.join(get_root(), data_dir)
+            if not os.path.exists(data_path):
+                os.makedirs(data_path)
+                
+            with open(os.path.join(data_path, "user_datas.pkl"), "wb") as f:
                 pickle.dump(self.user_datas, f)
                 logger.info("[Config] User datas saved.")
         except Exception as e:
             logger.info("[Config] User datas error: {}".format(e))
 
 
-config = Config()
+class ConfigManager:
+    """Singleton configuration manager with lazy loading."""
+    _instance = None
+    _config = None
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+    
+    def get_config(self) -> Config:
+        """Get configuration instance, loading if necessary."""
+        if self._config is None:
+            self._config = self._load_config()
+        return self._config
+    
+    def _load_config(self) -> Config:
+        """Internal config loading logic."""
+        config_path = "./config.json"
+        if not os.path.exists(config_path):
+            logger.info("配置文件不存在，将使用config-template.json模板")
+            config_path = "./config-template.json"
+
+        config_str = read_file(config_path)
+        logger.debug("[INIT] config str: {}".format(config_str))
+
+        # 将json字符串反序列化为dict类型
+        config = Config(json.loads(config_str))
+
+        # override config with environment variables.
+        # Some online deployment platforms (e.g. Railway) deploy project from github directly. 
+        # So you shouldn't put your secrets like api key in a config file, instead use environment variables to override the default config.
+        for name, value in os.environ.items():
+            name = name.lower()
+            if name in available_setting:
+                logger.info("[INIT] override config by environ args: {}={}".format(name, value))
+                try:
+                    config[name] = eval(value)
+                except:
+                    if value == "false":
+                        config[name] = False
+                    elif value == "true":
+                        config[name] = True
+                    else:
+                        config[name] = value
+
+        if config.get("debug", False):
+            logger.setLevel(logging.DEBUG)
+            logger.debug("[INIT] set log level to DEBUG")
+
+        logger.info("[INIT] load config: {}".format(config))
+
+        config.load_user_datas()
+        return config
+    
+    def reload_config(self):
+        """Force reload configuration from file."""
+        self._config = None
+        return self.get_config()
+    
+    def is_loaded(self) -> bool:
+        """Check if configuration is currently loaded."""
+        return self._config is not None
+
+
+# Global configuration manager instance
+_config_manager = ConfigManager()
 
 
 def load_config():
-    global config
-    config_path = "./config.json"
-    if not os.path.exists(config_path):
-        logger.info("配置文件不存在，将使用config-template.json模板")
-        config_path = "./config-template.json"
+    """Load configuration (legacy function for compatibility)."""
+    return _config_manager.get_config()
 
-    config_str = read_file(config_path)
-    logger.debug("[INIT] config str: {}".format(config_str))
 
-    # 将json字符串反序列化为dict类型
-    config = Config(json.loads(config_str))
+def conf():
+    """Get current configuration."""
+    return _config_manager.get_config()
 
-    # override config with environment variables.
-    # Some online deployment platforms (e.g. Railway) deploy project from github directly. So you shouldn't put your secrets like api key in a config file, instead use environment variables to override the default config.
-    for name, value in os.environ.items():
-        name = name.lower()
-        if name in available_setting:
-            logger.info("[INIT] override config by environ args: {}={}".format(name, value))
-            try:
-                config[name] = eval(value)
-            except:
-                if value == "false":
-                    config[name] = False
-                elif value == "true":
-                    config[name] = True
-                else:
-                    config[name] = value
 
-    if config.get("debug", False):
-        logger.setLevel(logging.DEBUG)
-        logger.debug("[INIT] set log level to DEBUG")
+def reload_config():
+    """Reload configuration from file."""
+    return _config_manager.reload_config()
 
-    logger.info("[INIT] load config: {}".format(config))
 
-    config.load_user_datas()
+def is_config_loaded() -> bool:
+    """Check if configuration is currently loaded."""
+    return _config_manager.is_loaded()
 
 
 def get_root():
@@ -146,12 +206,15 @@ def read_file(path):
         return f.read()
 
 
-def conf():
-    return config
-
-
 def get_appdata_dir():
-    data_path = os.path.join(get_root(), conf().get("appdata_dir", ""))
+    # Prevent circular dependency by getting config without triggering load if needed
+    config_instance = _config_manager._config
+    if config_instance is None:
+        # If config not loaded yet, use default data dir
+        data_path = os.path.join(get_root(), "data")
+    else:
+        data_path = os.path.join(get_root(), config_instance.get("appdata_dir", ""))
+    
     if not os.path.exists(data_path):
         logger.info("[INIT] data path not exists, create it: {}".format(data_path))
         os.makedirs(data_path)
@@ -192,5 +255,5 @@ global_config = {
     "admin_users": []
 }
 
-# Ensure config is loaded when this module is imported
-load_config()
+# Configuration is now loaded lazily when first accessed via conf()
+# No automatic loading on module import

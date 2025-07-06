@@ -6,7 +6,7 @@ import random
 import bleach
 import re
 from log import logger
-from config import load_config, conf
+from config import conf
 import requests
 from io import BytesIO
 from PIL import Image
