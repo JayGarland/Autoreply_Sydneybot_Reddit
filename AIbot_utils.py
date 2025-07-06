@@ -15,6 +15,34 @@ from praw.exceptions import ClientException
 # Import new modular context builder
 from context.builders import ContextBuilder
 
+# ================================
+# COMPATIBILITY LAYER - Gradual Migration to Modular Structure
+# ================================
+# Feature flags for gradual migration
+USE_NEW_CONTENT_CHECKER = os.getenv("USE_NEW_CONTENT_CHECKER", "false").lower() == "true"
+USE_NEW_REDDIT_CLIENT = os.getenv("USE_NEW_REDDIT_CLIENT", "false").lower() == "true"
+
+# Import new modules when enabled
+if USE_NEW_CONTENT_CHECKER:
+    try:
+        from bot.core.content_checker import ContentChecker
+        _content_checker = ContentChecker()
+        logger.info("✅ Using new ContentChecker module")
+    except ImportError as e:
+        logger.warning(f"Failed to import new ContentChecker: {e}")
+        USE_NEW_CONTENT_CHECKER = False
+
+if USE_NEW_REDDIT_CLIENT:
+    try:
+        from bot.core.reddit_client import RedditClient
+        _reddit_client = RedditClient()
+        logger.info("✅ Using new RedditClient module")
+    except ImportError as e:
+        logger.warning(f"Failed to import new RedditClient: {e}")
+        USE_NEW_REDDIT_CLIENT = False
+
+# ================================
+
 
 # load_config()
 bot_name = conf().get('bot_name')  # bot account
@@ -57,6 +85,33 @@ i = 1
 # Global context builder instance
 context_builder = None
 
+# ================================
+# FUNCTION OVERRIDES FOR NEW MODULES
+# ================================
+# Override functions when using new modules
+if USE_NEW_CONTENT_CHECKER:
+    def check_status(content):
+        """Override using new ContentChecker."""
+        return _content_checker.check_status(content)
+    
+    def check_at_me(content, bot_nickname):
+        """Override using new ContentChecker."""
+        return _content_checker.check_at_me(content, bot_nickname)
+    
+    def check_ignored(content):
+        """Override using new ContentChecker."""
+        return _content_checker.check_ignored(content)
+    
+    def check_replied(content):
+        """Override using new ContentChecker."""
+        return _content_checker.check_replied(content)
+
+if USE_NEW_REDDIT_CLIENT:
+    # Override global reddit instances
+    reddit = _reddit_client.reddit if USE_NEW_REDDIT_CLIENT else None
+    subreddit = _reddit_client.subreddit if USE_NEW_REDDIT_CLIENT else None
+# ================================
+
 def init():
     global reddit
     global subreddit
@@ -67,20 +122,35 @@ def init():
     global blacklist
     global random_subReddit
 
-    reddit = praw.Reddit(client_id=client_id, client_secret=client_secret, password=password, user_agent=user_agent, username=bot_name)
-    random_subReddit = random.choice(subreddit_names)
-    subreddit = reddit.subreddit(random_subReddit)
+    # Use new Reddit client if enabled, otherwise use legacy initialization
+    if USE_NEW_REDDIT_CLIENT:
+        reddit = _reddit_client.reddit
+        subreddit = _reddit_client.subreddit
+        random_subReddit = _reddit_client.current_subreddit_name
+        logger.info("✅ Using new RedditClient for initialization")
+    else:
+        # Legacy Reddit initialization
+        reddit = praw.Reddit(client_id=client_id, client_secret=client_secret, password=password, user_agent=user_agent, username=bot_name)
+        random_subReddit = random.choice(subreddit_names)
+        subreddit = reddit.subreddit(random_subReddit)
 
     # Initialize the context builder with the reddit instance
     context_builder = ContextBuilder(reddit)
 
+    # Load configuration
     bot_name_list = conf().get("bot_account")
     ignore_name_list = conf().get("blocked_account")
     blacklist = conf().get("blacklist")
 
+    # Load ignored content from pickle
     if os.path.exists(pickle_path):
         with open(pickle_path, "rb") as pkl:
             ignored_content = pickle.load(pkl)
+    
+    # If using new content checker, load ignored content into it
+    if USE_NEW_CONTENT_CHECKER:
+        _content_checker.load_ignored_content(ignored_content)
+        logger.info("✅ Loaded ignored content into new ContentChecker")
 
 
 # 从当前评论开始循环查找上级评论，直至找到主贴

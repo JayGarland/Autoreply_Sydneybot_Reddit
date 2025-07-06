@@ -9,7 +9,7 @@ from AIbot_utils import task, ignored_content, pickle_path
 import pickle
 
 # TEST SETTINGS - Edit these to configure your test
-TEST_METHOD = "at_me"    # Options: "at_me", "random", or None (auto)
+TEST_METHOD = "random"    # Options: "at_me", "random", or None (auto)
 DRY_RUN = False          # Set to False to actually post replies
 VERBOSE = True          # Set to False for less logging
 
