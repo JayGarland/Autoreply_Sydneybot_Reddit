@@ -14,7 +14,6 @@ from praw.exceptions import ClientException
 
 # Import new modular context builder
 from context.builders import ContextBuilder
-from context.builders import ContextBuilder
 
 
 # load_config()
@@ -95,9 +94,19 @@ def find_comment_ancestors(comment):
     return ancestors
 
 
+# Helper function to get content text based on type
+def get_content_text(content) -> str:
+    """Extract text content from submission or comment."""
+    return content.selftext if isinstance(content, praw.models.reddit.submission.Submission) else content.body
+
+# Helper function to check if content is a submission
+def is_submission(content) -> bool:
+    """Check if content is a submission (post) rather than a comment."""
+    return isinstance(content, praw.models.reddit.submission.Submission)
+
 # 检查评论、主贴的状态是否正常
 def check_status(content) -> str:
-    check_str = (content.selftext if (type(content) == praw.models.reddit.submission.Submission) else content.body)
+    check_str = get_content_text(content)
     if check_str in removed_content_list:
         return "removed"
     elif check_str == blocked_content:
@@ -105,33 +114,76 @@ def check_status(content) -> str:
     else:
         return "normal"
 
-
 # 检查评论、主贴是否召唤了 bot
 def check_at_me(content, bot_nickname) -> bool:
-    check_str = (content.selftext if (type(content) == praw.models.reddit.submission.Submission) else content.body)
+    check_str = get_content_text(content)
     # Check if the content author is not the bot name
     if content.author != bot_name:
         if check_str.lower().find(f"u/{bot_name}".lower()) != -1 or re.search(bot_nickname, check_str) is not None:
             return True
-        if type(content) == praw.models.reddit.submission.Submission:
+        if is_submission(content):
             if content.title.lower().find(f"u/{bot_name}".lower()) != -1 or re.search(bot_nickname, content.title) is not None:
                 return True
     return False
 
 
+# Helper function for common content validation checks
+def _check_basic_ignore_conditions(content) -> bool:
+    """Check basic conditions that should cause content to be ignored."""
+    global ignored_content
+    
+    # Already processed
+    if content.id in ignored_content:
+        return True
+    
+    # Author-based checks
+    if content.author in blacklist:
+        return True
+    
+    if content.author == bot_name or content.author in bot_name_list:
+        ignored_content.add(content.id)
+        return True
+    
+    if content.author in ignore_name_list:
+        ignored_content.add(content.id)
+        return True
+    
+    return False
+
+# Helper function to check for bot replies in content
+def _has_bot_replied(content, target_bot_name=None) -> bool:
+    """Check if bot has already replied to this content."""
+    if target_bot_name is None:
+        target_bot_name = bot_name
+    
+    if is_submission(content):
+        content.comments.replace_more(limit=0)
+        for comment in content.comments:
+            if comment.author == target_bot_name:
+                return True
+    else:
+        # try to refresh replies; if missing, treat as already handled
+        try:
+            content.refresh()
+        except ClientException as e:
+            logger.warning(f"Could not refresh comment {content.id}: {e} -- marking as replied")
+            return True
+
+        for reply in content.replies:
+            if reply.author == target_bot_name:
+                return True
+    return False
+
 # 检查评论、主贴是否应当忽略，用于随机触发
 def check_ignored(content) -> bool:
     global ignored_content
-    if content.id in ignored_content:
+    
+    # Basic ignore conditions
+    if _check_basic_ignore_conditions(content):
         return True
-    if content.author in ignore_name_list or content.author in bot_name_list:
-        ignored_content.add(content.id)
-        return True
-    if content.author in blacklist:
-        return True
-    if content.author == bot_name:
-        return True
-    if type(content) == praw.models.reddit.submission.Submission:
+    
+    # Check if any bot has replied (for ignore purposes, check all bots)
+    if is_submission(content):
         content.comments.replace_more(limit=0)
         for comment in content.comments:
             if comment.author in bot_name_list:
@@ -145,36 +197,19 @@ def check_ignored(content) -> bool:
                 return True
     return False
 
-
 # 检查评论、主贴是否已回复过，用于召唤触发
 def check_replied(content) -> bool:
     global ignored_content
-    if content.id in ignored_content:
+    
+    # Basic ignore conditions
+    if _check_basic_ignore_conditions(content):
         return True
-    if content.author in bot_name_list:
+    
+    # Check if this specific bot has replied
+    if _has_bot_replied(content):
         ignored_content.add(content.id)
         return True
-    if content.author in blacklist:
-        return True
-    if type(content) == praw.models.reddit.submission.Submission:
-        content.comments.replace_more(limit=0)
-        for comment in content.comments:
-            if comment.author == bot_name:
-                ignored_content.add(content.id)
-                return True
-    else:
-        # try to refresh replies; if missing, treat as already handled
-        try:
-            content.refresh()
-        except ClientException as e:
-            logger.warning(f"Could not refresh comment {content.id}: {e} -- marking as replied")
-            ignored_content.add(content.id)
-            return True
-
-        for reply in content.replies:
-            if reply.author == bot_name:
-                ignored_content.add(content.id)
-                return True
+    
     return False
 
 
@@ -365,13 +400,36 @@ def init_systemprompt_bot(sub_user_nickname, bot_nickname):
     logger.debug("PERSONA:" + persona)
     return persona
 
-def askbyuser(ask_string):
-    res = []
-    res.append({
-            "role": "user",
-            "parts": [{"text": ask_string}]
-        })
-    return res
+
+# Helper function to generate ask strings
+def generate_ask_string(content, bot_nickname, is_azure=False) -> str:
+    """Generate appropriate ask string based on content type."""
+    if is_submission(content):
+        return f"{bot_nickname}请回复前述{content.author}的帖子。"
+    else:
+        if is_azure:
+            return f"{bot_nickname}请回复。不必介绍你自己，只输出你回复的内容正文。不要排比，不要重复之前回复的内容或格式。"
+        else:
+            return (
+                f"{bot_nickname}请回复"
+                " 不必介绍你自己，只输出你回复内容的正文。不要排比，不要重复之前回复的内容或格式。"
+            )
+
+# Helper function for retry logic
+def _execute_with_retry(func, max_retries, *args, **kwargs):
+    """Execute a function with retry logic."""
+    for attempt in range(max_retries + 1):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            if attempt == max_retries:
+                logger.error(f"Failed after maximum retry attempts ({max_retries}): {e}")
+                raise
+            else:
+                logger.warning(f"Attempt {attempt + 1}/{max_retries + 1} failed: {e}")
+                # For specific retry scenarios, call the original function again
+                if hasattr(func, '__name__') and 'reply' in func.__name__:
+                    continue
 
 def get_image_from_url(url):
     response = requests.get(url)
@@ -389,16 +447,14 @@ def generate_reply(content, context, sub_user_nickname, bot_statement, bot_nickn
     context = "<|im_start|>system\n\n" + bleach.clean(context).strip()
 
     # build ask prompt and optional image URL
-    is_sub = isinstance(content, praw.models.reddit.submission.Submission)
+    is_sub = is_submission(content)
+    ask = generate_ask_string(content, bot_nickname)
+    
+    # Handle image URL extraction
+    img_url = None
     if is_sub:
-        ask = f"{bot_nickname}请回复前述{content.author}的帖子。"
         img_url = content.url if getattr(content, "url", "").lower().endswith((".jpg", ".png", ".jpeg", ".gif")) else None
     else:
-        ask = (
-            f"{bot_nickname}请回复"
-            " 不必介绍你自己，只输出你回复内容的正文。不要排比，不要重复之前回复的内容或格式。"
-        )
-        img_url = None
         if hasattr(content, "body_html"):
             m = re.search(r'<img src="(.+?)"', content.body_html)
             if m:
@@ -409,8 +465,6 @@ def generate_reply(content, context, sub_user_nickname, bot_statement, bot_nickn
                 img_url = sub_url
 
     ask = bleach.clean(ask).strip()
-    # logger.info(f"context: {context}")
-    # logger.info(f"ask: {ask}")
     logger.info(f"image: {img_url or 'None'}")
 
     try:
@@ -453,32 +507,37 @@ def generate_reply(content, context, sub_user_nickname, bot_statement, bot_nickn
         generate_reply(content, context, sub_user_nickname, bot_statement, bot_nickname, retry_count + 1)
 
 # (no alias needed)
-def azure_reply(content, context, sub_user_nickname, bot_statement, bot_nickname, retry_count = 0):
+def azure_reply(content, context, sub_user_nickname, bot_statement, bot_nickname, retry_count=0):
     """
     Generate a reply using Azure AI Inference and post to Reddit.
     """
     from azure_inference import azure_generate_reply
-    if retry_count > 3:
+    
+    MAX_RETRIES = 3
+    if retry_count > MAX_RETRIES:
         logger.error("Failed after maximum number of retry times (Azure)")
         return
+    
     context = bleach.clean(context).strip()
-    if type(content) == praw.models.reddit.submission.Submission:
-        ask_string = f"{bot_nickname}请回复前述{content.author}的帖子。"
-    else:
-        ask_string = f"{bot_nickname}请回复。不必介绍你自己，只输出你回复的内容正文。不要排比，不要重复之前回复的内容或格式。"
+    ask_string = generate_ask_string(content, bot_nickname, is_azure=True)
     ask_string = bleach.clean(ask_string).strip()
+    
     logger.info(f"[AZURE] context: {context}")
     logger.info(f"[AZURE] ask_string: {ask_string}")
+    
     try:
         persona = init_systemprompt_bot(sub_user_nickname, bot_nickname)
         system_prompt = persona + context
         user_prompt = ask_string
         reply_text = azure_generate_reply(system_prompt, user_prompt)
         logger.info(reply_text)
+        
         if "要和我对话请在发言中带上" not in reply_text:
             reply_text += bot_statement
+        
         content.reply(reply_text)
         return
+        
     except Exception as e:
         import traceback
         traceback.print_exc()
@@ -492,11 +551,15 @@ def fetch_comments_efficiently(subreddit, method, target_count, bot_nickname):
     TODO: Add caching for recent comment fetches
     TODO: Add rate limiting per subreddit
     """
+    def _fetch_and_shuffle(limit):
+        """Helper to fetch comments and shuffle them."""
+        comments = list(subreddit.comments(limit=limit))
+        random.shuffle(comments)
+        return comments
+    
     if method == "random":
         # For random mode, fetch exact target count
-        comment_list = list(subreddit.comments(limit=target_count))
-        random.shuffle(comment_list)
-        return comment_list
+        return _fetch_and_shuffle(target_count)
     
     elif method == "at_me":
         # For mention detection, fetch in batches and stop early when found
@@ -527,16 +590,14 @@ def fetch_comments_efficiently(subreddit, method, target_count, bot_nickname):
         except Exception as e:
             logger.warning(f"Error fetching comments efficiently: {e}")
             # Fallback to simple fetch
-            comments_found = list(subreddit.comments(limit=target_count))
+            return _fetch_and_shuffle(target_count)
         
         random.shuffle(comments_found)
         return comments_found
     
     else:
         # Fallback for unknown methods
-        comment_list = list(subreddit.comments(limit=target_count))
-        random.shuffle(comment_list)
-        return comment_list
+        return _fetch_and_shuffle(target_count)
 
 def task():
     global i
