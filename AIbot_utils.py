@@ -12,129 +12,62 @@ from io import BytesIO
 from PIL import Image
 from praw.exceptions import ClientException
 
-# Import new modular context builder
+# Import new modular components directly
 from context.builders import ContextBuilder
+from bot.core.content_checker import ContentChecker
+from bot.core.reddit_client import RedditClient
+from bot.utils.content_helpers import (
+    get_content_text, is_submission, is_image_url, 
+    get_image_from_url as get_image_url_helper, has_media_content
+)
 
-# ================================
-# COMPATIBILITY LAYER - Gradual Migration to Modular Structure
-# ================================
-# Feature flags for gradual migration
-USE_NEW_CONTENT_CHECKER = os.getenv("USE_NEW_CONTENT_CHECKER", "false").lower() == "true"
-USE_NEW_REDDIT_CLIENT = os.getenv("USE_NEW_REDDIT_CLIENT", "false").lower() == "true"
+# Initialize modular components
+content_checker = ContentChecker()
+reddit_client = RedditClient()
 
-# Import new modules when enabled
-if USE_NEW_CONTENT_CHECKER:
-    try:
-        from bot.core.content_checker import ContentChecker
-        _content_checker = ContentChecker()
-        logger.info("✅ Using new ContentChecker module")
-    except ImportError as e:
-        logger.warning(f"Failed to import new ContentChecker: {e}")
-        USE_NEW_CONTENT_CHECKER = False
-
-if USE_NEW_REDDIT_CLIENT:
-    try:
-        from bot.core.reddit_client import RedditClient
-        _reddit_client = RedditClient()
-        logger.info("✅ Using new RedditClient module")
-    except ImportError as e:
-        logger.warning(f"Failed to import new RedditClient: {e}")
-        USE_NEW_REDDIT_CLIENT = False
-
-# ================================
-
-
-# load_config()
-bot_name = conf().get('bot_name')  # bot account
-password = conf().get('password') # bot pswd
-client_id = conf().get('client_id') # api id
-client_secret = conf().get('client_secret')  # api 密钥
-
-user_agent = "autoreply bot created by u/Chinese_Dictator."  # 这一项可以随意填写
+# Configuration
+bot_name = conf().get('bot_name')
+password = conf().get('password')
+client_id = conf().get('client_id')
+client_secret = conf().get('client_secret')
+user_agent = "autoreply bot created by u/Chinese_Dictator."
 targetSubreddits = conf().get('TargetSubreddits')
-subreddit_names =  [list(targetSubreddits[i].keys())[0] for i in range(len(targetSubreddits))]  # 在哪个 subreddit 运行
-# logger.info(subreddit_names)
+subreddit_names = [list(targetSubreddits[i].keys())[0] for i in range(len(targetSubreddits))]
 
+min_char = conf().get('min_char')
+interval = conf().get('interval')
+submission_num = conf().get('submission_num')
+comment_num = conf().get('comment_num')
+comment_rate = conf().get('comment_rate')
+random_check_rate = conf().get('random_check_rate')
 
-min_char = conf().get('min_char')  # at least how many word in user's speech will trigger the bot reply
-interval = conf().get('interval') # check randomly in every max interval minute
-submission_num = conf().get('submission_num')  # everytime bot observe how many posts
-comment_num = conf().get('comment_num')  # every pattern when triggered the reply randomly, how many replies will be pulled and let the bot observe
-comment_rate = conf().get('comment_rate')  # every pattern when triggered the reply randomly, how much rate of the bot choose to reply the comment under a post, if not, reply to a post
-random_check_rate = conf().get('random_check_rate')  # bot everytime when bot checks, how many check patterns would trigger the bot to reply randomly otherwise only reply when someone @ the bot
-
-removed_content_list = ["[removed]", "[deleted]", "[ Removed by Reddit ]"]
-blocked_content = "[unavailable]"
-
-
+# Global variables
 reddit = None
 subreddit = None
 bot_name_list = None
 ignore_name_list = None
-
-blacklist = None  # if anyone in the blacklist, the bot will not reply to the whom included whatsoever
-
+blacklist = None
 bot_statement = conf().get("bot_statement")
-ai_model     = conf().get("ai_model")
+ai_model = conf().get("ai_model")
 ignored_content = set()
-pickle_path      = "./replied.pkl"
+pickle_path = "./replied.pkl"
 archived_pickle_path = "./replied.pkl.arc"
 client = None
 i = 1
-
-# Global context builder instance
 context_builder = None
 
-# ================================
-# FUNCTION OVERRIDES FOR NEW MODULES
-# ================================
-# Override functions when using new modules
-if USE_NEW_CONTENT_CHECKER:
-    def check_status(content):
-        """Override using new ContentChecker."""
-        return _content_checker.check_status(content)
-    
-    def check_at_me(content, bot_nickname):
-        """Override using new ContentChecker."""
-        return _content_checker.check_at_me(content, bot_nickname)
-    
-    def check_ignored(content):
-        """Override using new ContentChecker."""
-        return _content_checker.check_ignored(content)
-    
-    def check_replied(content):
-        """Override using new ContentChecker."""
-        return _content_checker.check_replied(content)
-
-if USE_NEW_REDDIT_CLIENT:
-    # Override global reddit instances
-    reddit = _reddit_client.reddit if USE_NEW_REDDIT_CLIENT else None
-    subreddit = _reddit_client.subreddit if USE_NEW_REDDIT_CLIENT else None
-# ================================
-
 def init():
-    global reddit
-    global subreddit
-    global ignored_content
-    global context_builder
-    global bot_name_list
-    global ignore_name_list
-    global blacklist
-    global random_subReddit
+    """Initialize the bot with modular components."""
+    global reddit, subreddit, ignored_content, context_builder
+    global bot_name_list, ignore_name_list, blacklist, random_subReddit
 
-    # Use new Reddit client if enabled, otherwise use legacy initialization
-    if USE_NEW_REDDIT_CLIENT:
-        reddit = _reddit_client.reddit
-        subreddit = _reddit_client.subreddit
-        random_subReddit = _reddit_client.current_subreddit_name
-        logger.info("✅ Using new RedditClient for initialization")
-    else:
-        # Legacy Reddit initialization
-        reddit = praw.Reddit(client_id=client_id, client_secret=client_secret, password=password, user_agent=user_agent, username=bot_name)
-        random_subReddit = random.choice(subreddit_names)
-        subreddit = reddit.subreddit(random_subReddit)
+    # Use new modular Reddit client
+    reddit = reddit_client.reddit
+    subreddit = reddit_client.subreddit
+    random_subReddit = reddit_client.current_subreddit_name
+    logger.info("✅ Using modular RedditClient")
 
-    # Initialize the context builder with the reddit instance
+    # Initialize context builder
     context_builder = ContextBuilder(reddit)
 
     # Load configuration
@@ -147,10 +80,27 @@ def init():
         with open(pickle_path, "rb") as pkl:
             ignored_content = pickle.load(pkl)
     
-    # If using new content checker, load ignored content into it
-    if USE_NEW_CONTENT_CHECKER:
-        _content_checker.load_ignored_content(ignored_content)
-        logger.info("✅ Loaded ignored content into new ContentChecker")
+    # Load ignored content into content checker
+    content_checker.load_ignored_content(ignored_content)
+    logger.info("✅ Using modular ContentChecker")
+
+
+# Helper functions for content checking (using modular components)
+def check_status(content) -> str:
+    """Check if content status is normal, removed, or blocked."""
+    return content_checker.check_status(content)
+
+def check_at_me(content, bot_nickname) -> bool:
+    """Check if content mentions the bot."""
+    return content_checker.check_at_me(content, bot_nickname)
+
+def check_ignored(content) -> bool:
+    """Check if content should be ignored for random triggers."""
+    return content_checker.check_ignored(content)
+
+def check_replied(content) -> bool:
+    """Check if content has already been replied to by this bot."""
+    return content_checker.check_replied(content)
 
 
 # 从当前评论开始循环查找上级评论，直至找到主贴
@@ -164,146 +114,29 @@ def find_comment_ancestors(comment):
     return ancestors
 
 
-# Helper function to get content text based on type
-def get_content_text(content) -> str:
-    """Extract text content from submission or comment."""
-    return content.selftext if isinstance(content, praw.models.reddit.submission.Submission) else content.body
-
-# Helper function to check if content is a submission
-def is_submission(content) -> bool:
-    """Check if content is a submission (post) rather than a comment."""
-    return isinstance(content, praw.models.reddit.submission.Submission)
-
-# 检查评论、主贴的状态是否正常
-def check_status(content) -> str:
-    check_str = get_content_text(content)
-    if check_str in removed_content_list:
-        return "removed"
-    elif check_str == blocked_content:
-        return "blocked"
-    else:
-        return "normal"
-
-# 检查评论、主贴是否召唤了 bot
-def check_at_me(content, bot_nickname) -> bool:
-    check_str = get_content_text(content)
-    # Check if the content author is not the bot name
-    if content.author != bot_name:
-        if check_str.lower().find(f"u/{bot_name}".lower()) != -1 or re.search(bot_nickname, check_str) is not None:
-            return True
-        if is_submission(content):
-            if content.title.lower().find(f"u/{bot_name}".lower()) != -1 or re.search(bot_nickname, content.title) is not None:
-                return True
-    return False
-
-
-# Helper function for common content validation checks
-def _check_basic_ignore_conditions(content) -> bool:
-    """Check basic conditions that should cause content to be ignored."""
-    global ignored_content
-    
-    # Already processed
-    if content.id in ignored_content:
-        return True
-    
-    # Author-based checks
-    if content.author in blacklist:
-        return True
-    
-    if content.author == bot_name or content.author in bot_name_list:
-        ignored_content.add(content.id)
-        return True
-    
-    if content.author in ignore_name_list:
-        ignored_content.add(content.id)
-        return True
-    
-    return False
-
-# Helper function to check for bot replies in content
-def _has_bot_replied(content, target_bot_name=None) -> bool:
-    """Check if bot has already replied to this content."""
-    if target_bot_name is None:
-        target_bot_name = bot_name
-    
-    if is_submission(content):
-        content.comments.replace_more(limit=0)
-        for comment in content.comments:
-            if comment.author == target_bot_name:
-                return True
-    else:
-        # try to refresh replies; if missing, treat as already handled
-        try:
-            content.refresh()
-        except ClientException as e:
-            logger.warning(f"Could not refresh comment {content.id}: {e} -- marking as replied")
-            return True
-
-        for reply in content.replies:
-            if reply.author == target_bot_name:
-                return True
-    return False
-
-# 检查评论、主贴是否应当忽略，用于随机触发
-def check_ignored(content) -> bool:
-    global ignored_content
-    
-    # Basic ignore conditions
-    if _check_basic_ignore_conditions(content):
-        return True
-    
-    # Check if any bot has replied (for ignore purposes, check all bots)
-    if is_submission(content):
-        content.comments.replace_more(limit=0)
-        for comment in content.comments:
-            if comment.author in bot_name_list:
-                ignored_content.add(content.id)
-                return True
-    else:
-        content.refresh()
-        for reply in content.replies:
-            if reply.author in bot_name_list:
-                ignored_content.add(content.id)
-                return True
-    return False
-
-# 检查评论、主贴是否已回复过，用于召唤触发
-def check_replied(content) -> bool:
-    global ignored_content
-    
-    # Basic ignore conditions
-    if _check_basic_ignore_conditions(content):
-        return True
-    
-    # Check if this specific bot has replied
-    if _has_bot_replied(content):
-        ignored_content.add(content.id)
-        return True
-    
-    return False
-
-
-# 将当前 sub 中所有主贴的标题和内容拼接成一个字符串
+# Context building functions (using modular components)
 def submission_list_to_context(submission_list, sub_user_nickname, subreddit):
-    """Use modular context builder for subreddit context (legacy wrapper)"""
+    """Use modular context builder for subreddit context."""
     return context_builder.build_subreddit_context(
         submission_list=submission_list,
         sub_user_nickname=sub_user_nickname,
         subreddit_name=subreddit.display_name
     )
 
-def get_user_history(username, post_limit=5, comment_limit=10, sub_user_nickname="用户"):
-    """Legacy wrapper - now handled by UserAnalyzer in context builder"""
-    # This function is deprecated but kept for compatibility
-    # The actual user history fetching is now done in context_builder.user_analyzer
-    return ""  # Return empty string for backward compatibility
-
 def build_submission_context(submission, sub_user_nickname):
-    """
-    Build context for submission replies using the new modular context builder.
-    This replaces the legacy monolithic implementation.
-    """
+    """Build context for submission replies using the new modular context builder."""
     return context_builder.build_submission_context(submission, sub_user_nickname)
+
+def build_comment_context(comment, ancestors, sub_user_nickname, bot_nickname, bot_name):
+    """Build context for comment replies using the new modular context builder."""
+    return context_builder.build_comment_context(
+        comment=comment,
+        ancestors=ancestors,
+        sub_user_nickname=sub_user_nickname,
+        bot_nickname=bot_nickname,
+        bot_name=bot_name,
+        bot_name_list=bot_name_list
+    )
 
 # 删除 bot 回复末尾声明自己是 bot 的话
 def remove_bot_statement(reply: str) -> str:
@@ -343,21 +176,8 @@ def concat_reply(former_str: str, latter_str: str) -> str:
     return former_str + latter_str
 
 
-def build_comment_context(comment, ancestors, sub_user_nickname, bot_nickname, bot_name):
-    """
-    Build context for comment replies using the new modular context builder.
-    This replaces the legacy monolithic implementation.
-    """
-    return context_builder.build_comment_context(
-        comment=comment,
-        ancestors=ancestors,
-        sub_user_nickname=sub_user_nickname,
-        bot_nickname=bot_nickname,
-        bot_name=bot_name,
-        bot_name_list=bot_name_list
-    )
-
 def traverse_comments(comment_list, method, bot_nickname):
+    """Traverse comments using modular content checker."""
     global ignored_content
     for comment in comment_list:
         if method == "random":
@@ -396,11 +216,14 @@ def traverse_comments(comment_list, method, bot_nickname):
             continue
 
         ignored_content.add(comment.id)
+        # Sync with modular content checker
+        content_checker.load_ignored_content(ignored_content)
         return comment, ancestors
     return None, None
 
 
 def traverse_submissions(submission_list, method, bot_nickname):
+    """Traverse submissions using modular content checker."""
     global ignored_content
     for submission in submission_list:
         if method == "random":
@@ -421,6 +244,8 @@ def traverse_submissions(submission_list, method, bot_nickname):
             if check_ignored(submission):
                 continue
         ignored_content.add(submission.id)
+        # Sync with modular content checker
+        content_checker.load_ignored_content(ignored_content)
         return submission
     return None
 
@@ -517,13 +342,13 @@ def generate_reply(content, context, sub_user_nickname, bot_statement, bot_nickn
     context = "<|im_start|>system\n\n" + bleach.clean(context).strip()
 
     # build ask prompt and optional image URL
-    is_sub = is_submission(content)
     ask = generate_ask_string(content, bot_nickname)
     
-    # Handle image URL extraction
+    # Handle image URL extraction using new content helpers
     img_url = None
-    if is_sub:
-        img_url = content.url if getattr(content, "url", "").lower().endswith((".jpg", ".png", ".jpeg", ".gif")) else None
+    if is_submission(content):
+        content_url = getattr(content, "url", "")
+        img_url = content_url if is_image_url(content_url) else None
     else:
         if hasattr(content, "body_html"):
             m = re.search(r'<img src="(.+?)"', content.body_html)
@@ -531,7 +356,7 @@ def generate_reply(content, context, sub_user_nickname, bot_statement, bot_nickn
                 img_url = m.group(1)
         if not img_url and hasattr(content, "submission"):
             sub_url = getattr(content.submission, "url", "")
-            if sub_url.lower().endswith((".jpg", ".png", ".jpeg", ".gif")):
+            if is_image_url(sub_url):
                 img_url = sub_url
 
     ask = bleach.clean(ask).strip()
