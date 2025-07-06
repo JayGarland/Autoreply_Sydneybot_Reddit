@@ -303,7 +303,7 @@ def build_submission_context(submission, sub_user_nickname):
     context_str += "3. 互动语调和情感表达 - 适应用户当前情绪和社交风格\n"
     context_str += "4. 内容重点和价值导向 - 基于用户兴趣突出相关方面\n\n"
     
-    context_str += f"[system](#additional_instructions)\n请先分析用户画像，然后据此个性化回复。回复时不要重复或仿写你打算回复的{sub_user_nickname}说过的话。不必介绍你自己，只输出你回复内容的正文。不要附上原文，不要输出所有可能的回复。" 
+    context_str += f"[system](#additional_instructions)\n请在内心默默分析用户画像，但不要在回复中展示分析过程或结果。直接基于分析结果个性化回复即可。回复时不要重复或仿写你打算回复的{sub_user_nickname}说过的话。不必介绍你自己，只输出你回复内容的正文。不要附上原文，不要输出所有可能的回复。不要输出用户画像分析内容。" 
     # TODO: Add conversation continuity - track previous bot interactions with same user
     # TODO: Add advanced persona adjustment based on user type detection
     # TODO: Add analytics tracking for personalized response effectiveness
@@ -435,7 +435,7 @@ def build_comment_context(comment, ancestors, sub_user_nickname, bot_nickname, b
     context_str += "4. 内容重点和价值导向 - 基于用户兴趣突出相关方面\n"
     context_str += "5. 现实关怀 - 如果合适，可以结合用户可能的现实处境给予建议\n\n"
     
-    context_str += f"[system](#additional_instructions)\n请先分析用户画像，想象这个人在现实生活中的样子，然后据此个性化回复。回复时不要重复或仿写你打算回复的{sub_user_nickname}说过的话。不必介绍你自己，只输出你回复的内容正文。不要附上原文，不要输出所有可能的回复。后续要求回复时，不要回复帖子本身，要回复{sub_user_nickname} {ancestors[0].author} 的最后一条评论:{ancestors[0].body}。"
+    context_str += f"[system](#additional_instructions)\n请在内心默默分析用户画像，想象这个人在现实生活中的样子，但不要在回复中展示分析过程或结果。直接基于分析结果个性化回复即可。回复时不要重复或仿写你打算回复的{sub_user_nickname}说过的话。不必介绍你自己，只输出你回复的内容正文。不要附上原文，不要输出所有可能的回复。后续要求回复时，不要回复帖子本身，要回复{sub_user_nickname} {ancestors[0].author} 的最后一条评论:{ancestors[0].body}。不要输出用户画像分析内容。"
     # TODO: Add conversation continuity tracking for this specific user
     # TODO: Add advanced persona adjustment based on detected user characteristics  
     # TODO: Add multi-language detection and adaptation
