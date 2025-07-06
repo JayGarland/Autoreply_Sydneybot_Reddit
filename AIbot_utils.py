@@ -12,6 +12,9 @@ from io import BytesIO
 from PIL import Image
 from praw.exceptions import ClientException
 
+# Import new modular context builder
+from context.builders import ContextBuilder
+
 
 # load_config()
 bot_name = conf().get('bot_name')  # bot account
@@ -51,10 +54,14 @@ archived_pickle_path = "./replied.pkl.arc"
 client = None
 i = 1
 
+# Global context builder instance
+context_builder = None
+
 def init():
     global reddit
     global subreddit
     global ignored_content
+    global context_builder
     global bot_name_list
     global ignore_name_list
     global blacklist
@@ -63,6 +70,9 @@ def init():
     reddit = praw.Reddit(client_id=client_id, client_secret=client_secret, password=password, user_agent=user_agent, username=bot_name)
     random_subReddit = random.choice(subreddit_names)
     subreddit = reddit.subreddit(random_subReddit)
+
+    # Initialize the context builder with the reddit instance
+    context_builder = ContextBuilder(reddit)
 
     bot_name_list = conf().get("bot_account")
     ignore_name_list = conf().get("blocked_account")
