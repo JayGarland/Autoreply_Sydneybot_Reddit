@@ -19,7 +19,7 @@ def azure_generate_reply(system_prompt, user_prompt, max_tokens=8192, model=None
     :param model: Model/deployment name (optional)
     :return: The generated reply string
     """
-    logger.info(f"[persona]:" + system_prompt)
+    # logger.info(f"[persona]:" + system_prompt)
     response = client.complete(
         messages=[
             SystemMessage(content=system_prompt),

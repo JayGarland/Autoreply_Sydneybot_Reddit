@@ -14,6 +14,7 @@ from praw.exceptions import ClientException
 
 # Import new modular context builder
 from context.builders import ContextBuilder
+from context.builders import ContextBuilder
 
 
 # load_config()
@@ -179,148 +180,25 @@ def check_replied(content) -> bool:
 
 # 将当前 sub 中所有主贴的标题和内容拼接成一个字符串
 def submission_list_to_context(submission_list, sub_user_nickname, subreddit):
-    context_str = f'[system](#context)\n当前 r/{subreddit} sub 中的帖子有：\n\n'
-    for submission in submission_list:
-        if check_status(submission) != "normal":
-            continue
-        submission_str = f"{sub_user_nickname} {submission.author} 发布了标题为“{submission.title}”的帖子"
-        if submission.selftext != "":
-            # 限制内容长度；Python 切片不会索引越界
-            submission_str += f"，内容是“{submission.selftext[:1000]}”"
-        submission_str += "\n"
-        context_str += submission_str
-    return context_str
-
+    """Use modular context builder for subreddit context (legacy wrapper)"""
+    return context_builder.build_subreddit_context(
+        submission_list=submission_list,
+        sub_user_nickname=sub_user_nickname,
+        subreddit_name=subreddit.display_name
+    )
 
 def get_user_history(username, post_limit=5, comment_limit=10, sub_user_nickname="用户"):
-    """
-    Fetch user's recent posts and comments for AI analysis.
-    TODO: Add caching mechanism to avoid repeated API calls for same user within time window
-    TODO: Add karma/reputation filtering - prioritize high-karma content
-    TODO: Add subreddit-specific weighting for current community activity
-    TODO: Filter out bot conversations and low-quality content
-    TODO: Implement smart caching strategy with 1-6 hour user history cache
-    TODO: Add user profile analysis caching for longer periods (interests, style)
-    TODO: Add selective history fetching - skip low-karma or new/throwaway accounts
-    TODO: Add rate limiting per user to avoid API abuse
-    TODO: Add better content filtering - remove deleted/removed content, prioritize recent high-karma
-    TODO: Add privacy and ethics considerations - exclude sensitive subreddits, respect deletion requests
-    TODO: Add timeout limits and graceful degradation for user history fetching
-    TODO: Add quality metrics tracking - which replies get better engagement with user history
-    TODO: Add user type detection for personalization effectiveness monitoring
-    
-    Args:
-        username: Reddit username to fetch history for
-        post_limit: Number of recent posts to fetch
-        comment_limit: Number of recent comments to fetch
-        sub_user_nickname: Nickname prefix for users in this subreddit
-    
-    Returns:
-        str: Formatted string containing user's recent activity, empty if error/no content
-    """
-    try:
-        user = reddit.redditor(username)
-        history_str = ""
-        
-        # Fetch recent posts
-        try:
-            posts = list(user.submissions.new(limit=post_limit))
-            if posts:
-                history_str += f"{sub_user_nickname} {username} 的近期发帖：\n"
-                for post in posts:
-                    if check_status(post) == "normal":
-                        post_content = f"标题: {post.title}"
-                        if post.selftext and post.selftext.strip():
-                            # Limit content length to avoid overwhelming the AI
-                            post_content += f" | 内容: {post.selftext[:500]}"
-                        post_content += f" | karma: {post.score} | 社区: r/{post.subreddit}\n"
-                        history_str += post_content
-                history_str += "\n"
-        except Exception as e:
-            logger.debug(f"Could not fetch posts for user {username}: {e}")
-        
-        # Fetch recent comments
-        try:
-            comments = list(user.comments.new(limit=comment_limit))
-            if comments:
-                history_str += f"{sub_user_nickname} {username} 的近期评论：\n"
-                for comment in comments:
-                    if check_status(comment) == "normal":
-                        # Limit comment length
-                        comment_text = comment.body[:300] if len(comment.body) > 300 else comment.body
-                        comment_content = f"评论: {comment_text} | karma: {comment.score} | 社区: r/{comment.subreddit}\n"
-                        history_str += comment_content
-                history_str += "\n"
-        except Exception as e:
-            logger.debug(f"Could not fetch comments for user {username}: {e}")
-            
-        return history_str.strip()
-        
-    except Exception as e:
-        logger.debug(f"Error fetching user history for {username}: {e}")
-        return ""
+    """Legacy wrapper - now handled by UserAnalyzer in context builder"""
+    # This function is deprecated but kept for compatibility
+    # The actual user history fetching is now done in context_builder.user_analyzer
+    return ""  # Return empty string for backward compatibility
 
 def build_submission_context(submission, sub_user_nickname):
-    # TODO: Enhanced System Prompt Structure - Add subreddit culture integration
-    # TODO: Add temporal context (time of day/week patterns, seasonal relevance, current events)
-    # TODO: Add community-specific norms and communication styles detection
-    # TODO: Add common abbreviations, memes, inside jokes for this subreddit
-    # TODO: Add typical user demographics analysis for this community
-    context_str = f'[system](#subreddit_context)\n当前 r/{submission.subreddit} 社区背景信息。\n\n'
-    
-    # TODO: Add submission overview with engagement metrics and discussion trends
-    # TODO: Add hot topics and current events relevant to community
-    context_str += f'[system](#conversation_context)\n以下是{sub_user_nickname} {submission.author} 发的帖子。\n'
-    context_str += f"帖子标题是{submission.title}"
-    if submission.selftext != "":
-        # 限制内容长度；Python 切片不会索引越界
-        context_str += f"，内容是{submission.selftext[:6000]}"
-    context_str += f" | karma: {submission.score} | 评论数: {submission.num_comments}\n\n"
-    
-    # Add user history analysis
-    user_history = get_user_history(str(submission.author), sub_user_nickname=sub_user_nickname)
-    if user_history:
-        context_str += f"[system](#user_history)\n以下是{submission.author}的近期发帖和评论历史：\n\n{user_history}\n\n"
-        
-        # Add user portrait generation instructions
-        # TODO: Add behavioral pattern analysis - communication patterns, emotional tendencies
-        # TODO: Add demographic speculation framework - age, profession, education, location hints
-        # TODO: Add personality traits detection - problem-solving approach, humor style, authority relationship
-        # TODO: Add learning style identification - asks questions vs researches independently
-        context_str += f"[system](#user_portrait)\n请基于以上历史数据，构建此{sub_user_nickname}的详细画像：\n\n"
-        context_str += "个人特征推测：\n"
-        context_str += "- 年龄段：[基于话题、表达方式、技术熟悉度推断]\n"
-        context_str += "- 职业背景：[从专业知识、发帖时间、讨论话题推断]\n" 
-        context_str += "- 教育水平：[从语言复杂度、逻辑思维、知识面判断]\n"
-        context_str += "- 性格特点：[从互动方式、情绪表达、争论风格分析]\n\n"
-        context_str += "交流偏好：\n"
-        context_str += "- 信息接收方式：[详细解释 vs 简洁要点]\n"
-        context_str += "- 社交风格：[正式 vs 随意，严肃 vs 幽默]\n"
-        context_str += "- 学习模式：[提问型 vs 自研型，理论 vs 实践]\n"
-        context_str += "- 决策方式：[理性分析 vs 直觉判断]\n\n"
-        context_str += "当前状态判断：\n"
-        context_str += "- 情绪状态：[从最近发言语调判断]\n"
-        context_str += "- 知识需求：[当前遇到的问题类型]\n"
-        context_str += "- 参与动机：[寻求帮助 vs 分享知识 vs 娱乐]\n\n"
-    
-    # TODO: Enhanced personalization depth - technical depth adjustment, language style matching
-    # TODO: Add emotional language adaptation, interaction mode adjustment based on user type
-    # TODO: Add content focus adjustment based on user interests and expertise level
-    context_str += f"[system](#reply_strategy)\n个性化回复策略：\n"
-    context_str += "基于用户画像，请采用最适合此用户的：\n"
-    context_str += "1. 语言风格和专业深度 - 根据用户知识水平调整解释详细程度\n"
-    context_str += "2. 信息组织方式和举例类型 - 匹配用户的学习偏好\n"
-    context_str += "3. 互动语调和情感表达 - 适应用户当前情绪和社交风格\n"
-    context_str += "4. 内容重点和价值导向 - 基于用户兴趣突出相关方面\n\n"
-    
-    context_str += f"[system](#additional_instructions)\n请在内心默默分析用户画像，但不要在回复中展示分析过程或结果。直接基于分析结果个性化回复即可。回复时不要重复或仿写你打算回复的{sub_user_nickname}说过的话。不必介绍你自己，只输出你回复内容的正文。不要附上原文，不要输出所有可能的回复。不要输出用户画像分析内容。" 
-    # TODO: Add conversation continuity - track previous bot interactions with same user
-    # TODO: Add advanced persona adjustment based on user type detection
-    # TODO: Add analytics tracking for personalized response effectiveness
-    # TODO: Add multi-language adaptation - detect user's primary language, cultural context awareness
-    # TODO: Add dynamic persona modification based on user characteristics in real-time
-    return context_str
-
+    """
+    Build context for submission replies using the new modular context builder.
+    This replaces the legacy monolithic implementation.
+    """
+    return context_builder.build_submission_context(submission, sub_user_nickname)
 
 # 删除 bot 回复末尾声明自己是 bot 的话
 def remove_bot_statement(reply: str) -> str:
@@ -361,99 +239,18 @@ def concat_reply(former_str: str, latter_str: str) -> str:
 
 
 def build_comment_context(comment, ancestors, sub_user_nickname, bot_nickname, bot_name):
-    submission = reddit.submission(comment.link_id[3:])
-    context_str = f'[system](#context)\n以下是{sub_user_nickname} {submission.author} 发的帖子。\n'
-    context_str += f"帖子标题是“{submission.title}”"
-    if submission.selftext != "":
-        context_str += f"，内容是“{submission.selftext}”"
-    context_str += "\n"
-    first_comment = True
-    replied_to_author = submission.author
-    ancestors.insert(0, comment)
-    for ancestor in reversed(ancestors):
-        if first_comment:
-            first_comment = False
-            if ancestor.author in bot_name_list:
-                if ancestor.author == bot_name:
-                    context_str += f"{bot_nickname} 评论 {sub_user_nickname} {replied_to_author} 的帖子说{remove_bot_statement(ancestor.body)}\n"
-                else:
-                    context_str += f"{sub_user_nickname} {ancestor.author} 评论 {replied_to_author} 的帖子说{remove_bot_statement(ancestor.body)}\n"
-            elif replied_to_author == bot_name:
-                context_str += f"{sub_user_nickname} {ancestor.author} 评论 {bot_nickname} 的帖子说{ancestor.body}\n"
-            else:
-                context_str += f"{sub_user_nickname} {ancestor.author} 评论 {replied_to_author} 的帖子说{ancestor.body}\n"
-        else:
-            if ancestor.author in bot_name_list:
-                if ancestor.author == bot_name:
-                    context_str += f"{bot_nickname} 评论 {sub_user_nickname} {replied_to_author} 的回复说{remove_bot_statement(ancestor.body)}\n"
-                else:
-                    context_str += f"{sub_user_nickname} {ancestor.author} 评论 {replied_to_author} 的回复说{remove_bot_statement(ancestor.body)}\n"
-            elif replied_to_author == bot_name:
-                context_str += f"{sub_user_nickname} {ancestor.author} 评论 {bot_nickname} 的回复说{ancestor.body}\n"
-            else:
-                context_str += f"{sub_user_nickname} {ancestor.author} 评论 {replied_to_author} 的回复说{ancestor.body}\n"
-        replied_to_author = ancestor.author
-
-    context_str += "\n\n"
-    context_str += f"在此帖子下还有一些其他{sub_user_nickname}的评论：\n" 
-    submission.comment_sort= "top"
-    top_comments = submission.comments.list()[:3]
-    for comment in top_comments:
-        if comment.author not in bot_name_list:
-            context_str += comment.body + "(" + str(comment.score) + "karma)" + "\n" #todo remove the comments of bots
-
-    context_str += "\n\n"
-    
-    # Add user history analysis for the comment author
-    comment_author = str(ancestors[0].author)  # Get the original comment author
-    user_history = get_user_history(comment_author, sub_user_nickname=sub_user_nickname)
-    if user_history:
-        context_str += f"[system](#user_history)\n以下是{comment_author}的近期发帖和评论历史：\n\n{user_history}\n\n"
-        
-        # TODO: Add cross-thread behavior analysis - how user behaves in different conversation contexts
-        # TODO: Add conversation style adaptation based on thread type and community norms
-        # TODO: Add user reputation/karma consideration for current subreddit specifically
-        context_str += f"[system](#user_portrait)\n请基于以上历史数据，构建此{sub_user_nickname}的详细画像：\n\n"
-        context_str += "个人特征推测：\n"
-        context_str += "- 年龄段：[基于话题、表达方式、技术熟悉度推断]\n"
-        context_str += "- 职业背景：[从专业知识、发帖时间、讨论话题推断]\n" 
-        context_str += "- 教育水平：[从语言复杂度、逻辑思维、知识面判断]\n"
-        context_str += "- 性格特点：[从互动方式、情绪表达、争论风格分析]\n\n"
-        context_str += "交流偏好：\n"
-        context_str += "- 信息接收方式：[详细解释 vs 简洁要点]\n"
-        context_str += "- 社交风格：[正式 vs 随意，严肃 vs 幽默]\n"
-        context_str += "- 学习模式：[提问型 vs 自研型，理论 vs 实践]\n"
-        context_str += "- 决策方式：[理性分析 vs 直觉判断]\n\n"
-        context_str += "当前状态判断：\n"
-        context_str += "- 情绪状态：[从最近发言语调判断]\n"
-        context_str += "- 知识需求：[当前遇到的问题类型]\n"
-        context_str += "- 参与动机：[寻求帮助 vs 分享知识 vs 娱乐]\n\n"
-        context_str += "现实生活推测：\n"
-        context_str += "- 生活状态：[学生/职场人士/退休等]\n"
-        context_str += "- 兴趣爱好：[从参与的社区和话题推断]\n"
-        context_str += "- 社交圈子：[技术圈/游戏圈/学术圈等]\n"
-        context_str += "- 个人挑战：[当前可能面临的问题或困扰]\n\n"
-    
-    # TODO: Add thread-specific personalization - adapt based on conversation thread characteristics
-    # TODO: Add community consensus detection and controversy awareness
-    # TODO: Add real-time emotion/sentiment adjustment based on thread atmosphere
-    context_str += f"[system](#reply_strategy)\n个性化回复策略：\n"
-    context_str += "基于用户画像，请采用最适合此用户的：\n"
-    context_str += "1. 语言风格和专业深度 - 根据用户知识水平调整解释详细程度\n"
-    context_str += "2. 信息组织方式和举例类型 - 匹配用户的学习偏好\n"
-    context_str += "3. 互动语调和情感表达 - 适应用户当前情绪和社交风格\n"
-    context_str += "4. 内容重点和价值导向 - 基于用户兴趣突出相关方面\n"
-    context_str += "5. 现实关怀 - 如果合适，可以结合用户可能的现实处境给予建议\n\n"
-    
-    context_str += f"[system](#additional_instructions)\n请在内心默默分析用户画像，想象这个人在现实生活中的样子，但不要在回复中展示分析过程或结果。直接基于分析结果个性化回复即可。回复时不要重复或仿写你打算回复的{sub_user_nickname}说过的话。不必介绍你自己，只输出你回复的内容正文。不要附上原文，不要输出所有可能的回复。后续要求回复时，不要回复帖子本身，要回复{sub_user_nickname} {ancestors[0].author} 的最后一条评论:{ancestors[0].body}。不要输出用户画像分析内容。"
-    # TODO: Add conversation continuity tracking for this specific user
-    # TODO: Add advanced persona adjustment based on detected user characteristics  
-    # TODO: Add multi-language detection and adaptation
-    # TODO: Add analytics tracking for response quality and user engagement
-    # TODO: Add performance analytics - API usage efficiency, response time impact monitoring
-    # TODO: Add quality control - detect inappropriate personalization, prevent stalking-like behavior
-    return context_str
-
+    """
+    Build context for comment replies using the new modular context builder.
+    This replaces the legacy monolithic implementation.
+    """
+    return context_builder.build_comment_context(
+        comment=comment,
+        ancestors=ancestors,
+        sub_user_nickname=sub_user_nickname,
+        bot_nickname=bot_nickname,
+        bot_name=bot_name,
+        bot_name_list=bot_name_list
+    )
 
 def traverse_comments(comment_list, method, bot_nickname):
     global ignored_content
