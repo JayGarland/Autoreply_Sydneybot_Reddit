@@ -65,7 +65,7 @@ def init():
     reddit = reddit_client.reddit
     subreddit = reddit_client.subreddit
     random_subReddit = reddit_client.current_subreddit_name
-    logger.info("✅ Using modular RedditClient")
+    # logger.info("✅ Using modular RedditClient")
 
     # Initialize context builder
     context_builder = ContextBuilder(reddit)
@@ -82,7 +82,7 @@ def init():
     
     # Load ignored content into content checker
     content_checker.load_ignored_content(ignored_content)
-    logger.info("✅ Using modular ContentChecker")
+    # logger.info("✅ Using modular ContentChecker")
 
 
 # Helper functions for content checking (using modular components)
@@ -101,6 +101,48 @@ def check_ignored(content) -> bool:
 def check_replied(content) -> bool:
     """Check if content has already been replied to by this bot."""
     return content_checker.check_replied(content)
+
+
+def log_current_config_info():
+    """Log current configuration information for debugging."""
+    try:
+        current_config = conf()
+        logger.info("=" * 60)
+        logger.info("[REPLY_PROCESS] Current Configuration Status:")
+        logger.info(f"[REPLY_PROCESS] Bot Name: {current_config.get('bot_name', 'Not Set')}")
+        logger.info(f"[REPLY_PROCESS] AI Model: {current_config.get('ai_model', 'Not Set')}")
+        logger.info(f"[REPLY_PROCESS] Target Subreddits: {current_config.get('TargetSubreddits', 'Not Set')}")
+        logger.info(f"[REPLY_PROCESS] Min Characters: {current_config.get('min_char', 'Not Set')}")
+        logger.info(f"[REPLY_PROCESS] Comment Rate: {current_config.get('comment_rate', 'Not Set')}")
+        logger.info(f"[REPLY_PROCESS] Random Check Rate: {current_config.get('random_check_rate', 'Not Set')}")
+        
+        # Show current subreddit-specific settings
+        if hasattr(reddit_client, 'current_subreddit_name'):
+            current_sub = reddit_client.current_subreddit_name
+            logger.info(f"[REPLY_PROCESS] Current Subreddit: {current_sub}")
+            
+            # Find settings for current subreddit
+            for sub_config in current_config.get("TargetSubreddits", []):
+                if current_sub in sub_config:
+                    sub_settings = sub_config[current_sub]
+                    logger.info(f"[REPLY_PROCESS] Subreddit Settings: {sub_settings}")
+                    break
+        
+        # Show environment overrides if any
+        env_vars = []
+        for env_name in ['BOT_NAME', 'AI_MODEL', 'AZURE_KEY', 'GEMINI_API_KEY', 'DEEPSEEK_API_KEY']:
+            if env_name.lower() in os.environ:
+                env_vars.append(f"{env_name}=***")
+        
+        if env_vars:
+            logger.info(f"[REPLY_PROCESS] Environment Variables Active: {env_vars}")
+        else:
+            logger.info("[REPLY_PROCESS] No environment variable overrides active")
+            
+        logger.info("=" * 60)
+        
+    except Exception as e:
+        logger.warning(f"[REPLY_PROCESS] Error logging config info: {e}")
 
 
 # 从当前评论开始循环查找上级评论，直至找到主贴
@@ -338,6 +380,13 @@ def generate_reply(content, context, sub_user_nickname, bot_statement, bot_nickn
         logger.error(f"Failed after maximum retry attempts ({MAX_RETRIES})")
         return
 
+    # Log configuration info before generating reply
+    logger.info(f"[GENERATE_REPLY] Starting reply generation (attempt {retry_count + 1})")
+    logger.info(f"[GENERATE_REPLY] Current AI Model: {conf().get('ai_model', 'Not Set')}")
+    logger.info(f"[GENERATE_REPLY] Bot Statement Template: {conf().get('bot_statement', 'Not Set')}")
+    logger.info(f"[GENERATE_REPLY] Content Type: {'submission' if is_submission(content) else 'comment'}")
+    logger.info(f"[GENERATE_REPLY] Content Author: {getattr(content, 'author', 'Unknown')}")
+
     # prepend system tag and clean
     context = "<|im_start|>system\n\n" + bleach.clean(context).strip()
 
@@ -360,17 +409,39 @@ def generate_reply(content, context, sub_user_nickname, bot_statement, bot_nickn
                 img_url = sub_url
 
     ask = bleach.clean(ask).strip()
-    logger.info(f"image: {img_url or 'None'}")
+    logger.info(f"[GENERATE_REPLY] Image URL detected: {img_url or 'None'}")
+    logger.info(f"[GENERATE_REPLY] Ask string: {ask}")
 
     try:
         persona = init_systemprompt_bot(sub_user_nickname, bot_nickname)
         messages = [{"role": "SYSTEM", "content": context}]
         query = ask if not img_url else [ask, get_image_from_url(img_url)]
 
+        # Log AI model configuration details
+        current_ai_model = conf().get('ai_model', 'Unknown')
+        logger.info(f"[GENERATE_REPLY] Using AI Model: {current_ai_model}")
+        
+        if current_ai_model == 'AZURE':
+            azure_endpoint = conf().get('azure_endpoint', 'Not Set')
+            azure_deployment = conf().get('azure_deployment', 'Not Set')
+            logger.info(f"[GENERATE_REPLY] Azure Endpoint: {azure_endpoint}")
+            logger.info(f"[GENERATE_REPLY] Azure Deployment: {azure_deployment}")
+        elif current_ai_model == 'GEMINI':
+            gemini_key_set = bool(conf().get('gemini_api_key'))
+            logger.info(f"[GENERATE_REPLY] Gemini API Key Set: {gemini_key_set}")
+        elif current_ai_model == 'DEEPSEEK':
+            deepseek_key_set = bool(conf().get('deepseek_api_key'))
+            logger.info(f"[GENERATE_REPLY] DeepSeek API Key Set: {deepseek_key_set}")
+        elif current_ai_model == 'COHERE':
+            cohere_key_set = bool(conf().get('cohere_api_key'))
+            logger.info(f"[GENERATE_REPLY] Cohere API Key Set: {cohere_key_set}")
+
         if ai_model == 'COHERE':
+            logger.info(f"[GENERATE_REPLY] Executing Cohere model request...")
             resp = client.chat(message=query, preamble=persona, chat_history=messages, temperature=0.7)
             reply = resp.text
         elif ai_model == 'DEEPSEEK':
+            logger.info(f"[GENERATE_REPLY] Executing DeepSeek model request...")
             msgs = [
                 {"role": "system", "content": persona + context},
                 {"role": "user",   "content": ask}
@@ -498,6 +569,9 @@ def task():
     global i
     init()
     logger.info(subreddit)
+    
+    # Log current configuration info at the start of each reply process
+    log_current_config_info()
 
     for reddit in conf().get("TargetSubreddits"):
         if random_subReddit in reddit:
@@ -512,6 +586,7 @@ def task():
         method = "random"
     else:
         method = "at_me"
+    
     submission_list = list(subreddit.new(limit=submission_num))
     random.shuffle(submission_list)
     

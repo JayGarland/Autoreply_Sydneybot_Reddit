@@ -131,18 +131,23 @@ class ConfigManager:
             logger.info("配置文件不存在，将使用config-template.json模板")
             config_path = "./config-template.json"
 
+        logger.info(f"[INIT] Loading config from: {config_path}")
         config_str = read_file(config_path)
+        logger.info(f"[INIT] Config file content:\n{config_str}")
         logger.debug("[INIT] config str: {}".format(config_str))
 
         # 将json字符串反序列化为dict类型
         config = Config(json.loads(config_str))
+        logger.info(f"[INIT] Parsed config keys: {list(config.keys())}")
 
         # override config with environment variables.
         # Some online deployment platforms (e.g. Railway) deploy project from github directly. 
         # So you shouldn't put your secrets like api key in a config file, instead use environment variables to override the default config.
+        env_overrides = []
         for name, value in os.environ.items():
             name = name.lower()
             if name in available_setting:
+                env_overrides.append(f"{name}={value}")
                 logger.info("[INIT] override config by environ args: {}={}".format(name, value))
                 try:
                     config[name] = eval(value)
@@ -153,12 +158,18 @@ class ConfigManager:
                         config[name] = True
                     else:
                         config[name] = value
+        
+        if env_overrides:
+            logger.info(f"[INIT] Applied {len(env_overrides)} environment overrides: {env_overrides}")
+        else:
+            logger.info("[INIT] No environment variable overrides applied")
 
         if config.get("debug", False):
             logger.setLevel(logging.DEBUG)
             logger.debug("[INIT] set log level to DEBUG")
 
-        logger.info("[INIT] load config: {}".format(config))
+        logger.info("[INIT] Final loaded config: {}".format(config))
+        logger.info(f"[INIT] Config loaded successfully from {config_path}")
 
         config.load_user_datas()
         return config
