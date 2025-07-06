@@ -602,8 +602,8 @@ def generate_reply(content, context, sub_user_nickname, bot_statement, bot_nickn
                 img_url = sub_url
 
     ask = bleach.clean(ask).strip()
-    logger.info(f"context: {context}")
-    logger.info(f"ask: {ask}")
+    # logger.info(f"context: {context}")
+    # logger.info(f"ask: {ask}")
     logger.info(f"image: {img_url or 'None'}")
 
     try:
@@ -655,7 +655,6 @@ def azure_reply(content, context, sub_user_nickname, bot_statement, bot_nickname
         logger.error("Failed after maximum number of retry times (Azure)")
         return
     context = bleach.clean(context).strip()
-    context = "<|im_start|>system\n\n" + context
     if type(content) == praw.models.reddit.submission.Submission:
         ask_string = f"{bot_nickname}请回复前述{content.author}的帖子。"
     else:
@@ -679,6 +678,59 @@ def azure_reply(content, context, sub_user_nickname, bot_statement, bot_nickname
         logger.warning(e)
         azure_reply(content, context, sub_user_nickname, bot_statement, bot_nickname, retry_count + 1)
 
+def fetch_comments_efficiently(subreddit, method, target_count, bot_nickname):
+    """
+    Smart comment fetching that stops early when enough mentions found.
+    TODO: Add pagination support for large subreddits
+    TODO: Add caching for recent comment fetches
+    TODO: Add rate limiting per subreddit
+    """
+    if method == "random":
+        # For random mode, fetch exact target count
+        comment_list = list(subreddit.comments(limit=target_count))
+        random.shuffle(comment_list)
+        return comment_list
+    
+    elif method == "at_me":
+        # For mention detection, fetch in batches and stop early when found
+        batch_size = min(target_count, 50)  # Fetch in smaller batches
+        max_total = target_count * 10  # Maximum to fetch (same as before)
+        comments_found = []
+        mentions_found = 0
+        total_fetched = 0
+        
+        try:
+            for comment in subreddit.comments(limit=max_total):
+                comments_found.append(comment)
+                total_fetched += 1
+                
+                # Check if this comment mentions the bot
+                if check_at_me(comment, bot_nickname):
+                    mentions_found += 1
+                
+                # Stop early if we found enough mentions or reached batch limit
+                if mentions_found >= 3 or total_fetched >= batch_size:
+                    logger.debug(f"Early stop: found {mentions_found} mentions in {total_fetched} comments")
+                    break
+                    
+                # If no mentions found in first batch, continue but limit total
+                if total_fetched >= max_total:
+                    break
+                    
+        except Exception as e:
+            logger.warning(f"Error fetching comments efficiently: {e}")
+            # Fallback to simple fetch
+            comments_found = list(subreddit.comments(limit=target_count))
+        
+        random.shuffle(comments_found)
+        return comments_found
+    
+    else:
+        # Fallback for unknown methods
+        comment_list = list(subreddit.comments(limit=target_count))
+        random.shuffle(comment_list)
+        return comment_list
+
 def task():
     global i
     init()
@@ -699,11 +751,9 @@ def task():
         method = "at_me"
     submission_list = list(subreddit.new(limit=submission_num))
     random.shuffle(submission_list)
-    if method == "random":
-        comment_list = list(subreddit.comments(limit=comment_num))
-    else:
-        comment_list = list(subreddit.comments(limit=comment_num * 10))
-    random.shuffle(comment_list)
+    
+    # Use smart comment fetching instead of wasteful approach
+    comment_list = fetch_comments_efficiently(subreddit, method, comment_num, bot_callname)
     comment = None
     context_str = submission_list_to_context(submission_list, sub_user_nickname, subreddit)
     if method == "at_me" or random.random() < comment_rate:
