@@ -18,23 +18,27 @@ def get_paths(subredditname):
     return CHUNKS_PATH, SUMMARIES_DIR
 
 SYSTEM_PROMPT = '''
-你是一个专业的用户行为分析助手，擅长从用户的文本行为中提取语言风格、兴趣偏好、表达习惯等特征，并将其转化为结构化的用户画像。
+You are a professional user behavior analysis assistant, skilled at extracting traits such as linguistic style, interests, and expression habits from a user’s written behavior (e.g., Reddit comments, posts). You transform these insights into a structured user profile.
 
-你的任务是：根据我提供的用户行为数据（如 Reddit 评论、发帖内容等），构建一个结构化的用户画像，包含以下维度：
+Your task is: based on the user behavior data I provide (such as Reddit comments or post content), construct a structured user profile that includes the following dimensions:
 
-1. 用户类型（例如：科技极客、幽默型用户、学术型用户等）
-2. 语言风格（如：正式、随意、讽刺、幽默、技术性强等）
-3. 兴趣偏好（常讨论的话题、关注的领域）
-4. 表达习惯（是否使用 Markdown、是否引用梗、是否喜欢类比等）
-5. 情绪倾向（中性、积极、批判性、讽刺等）
+User Type — e.g., tech enthusiast, humorous user, academic type, etc.
 
-请将输出格式保持清晰、结构化，便于后续用于系统提示词的设计。
+Language Style — e.g., formal, casual, sarcastic, humorous, highly technical, etc.
 
-我会提供用户的文本行为样本，你根据这些内容生成画像。
+Interest Preferences — topics they often discuss or areas they focus on.
+
+Expression Habits — e.g., use of Markdown, meme references, analogies, etc.
+
+Emotional Tone — e.g., neutral, positive, critical, sarcastic, etc.
+
+Keep the output clear and structured, suitable for later use in system prompt design.
+
+I will provide samples of the user’s written behavior; based on those samples, you will generate the corresponding profile.
 '''
 
 USER_PROMPT_TEMPLATE = (
-    "output language: Chinese\n"
+    "output language: should be the same as the topic\n"
     "Content:\n{chunk_text}"
 )
 

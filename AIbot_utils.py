@@ -327,13 +327,25 @@ def init_systemprompt_bot(sub_user_nickname, bot_nickname):
         # persona = conf().get("persona")
         # throw exception if no persona is found
         raise ValueError(f"No persona found for subreddit {subreddit}. Please check your configuration.")
+
+    # Escape all curly braces except for {n}, {k}, {m}
+    import re
+    def escape_non_placeholder_braces(text):
+        # Replace all {something} with {{something}} unless it's {n}, {k}, or {m}
+        def replacer(match):
+            key = match.group(1)
+            if key in ('n', 'k', 'm'):
+                return '{' + key + '}'
+            return '{{' + key + '}}'
+        return re.sub(r'\{([^{}]+)\}', replacer, text)
+
+    persona = escape_non_placeholder_braces(persona)
     try:
         persona = persona.format(n=sub_user_nickname, k=bot_nickname, m=subreddit)
-    except ValueError as e:
-        logger.warning(str(e))
-        # Escape all single braces to avoid format errors
-        persona = persona.replace('{', '{{').replace('}', '}}')
-        persona = persona.format(n=sub_user_nickname, k=bot_nickname, m=subreddit)
+    except Exception as e:
+        logger.warning(f"[PERSONA FORMAT ERROR] {e}")
+        # If formatting fails, return the persona as-is
+        pass
     logger.debug("PERSONA:" + persona)
     return persona
 

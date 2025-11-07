@@ -22,7 +22,7 @@ def main(subredditname):
         style_guide = f.read()
 
     # You can edit this system prompt as needed
-    SYSTEM_PROMPT = '''You will act as an expert prompt engineer and persona creator for GPT3, GPT4, or ChatGPT interfaces. Your task is twofold:
+    SYSTEM_PROMPT = '''You will act as an expert prompt engineer and persona creator for ChatGPT alike interfaces. Your task is twofold:
 
     Create a detailed and coherent human persona based on user input or general specifications. This persona should include attributes such as name, background, expertise, communication style, tone, and any other relevant characteristics that shape how the persona interacts.
 
@@ -38,8 +38,7 @@ def main(subredditname):
     First, present the fully developed persona description.
     Then, provide the new or improved system prompt, ready for direct use.
     Finally, include a concise explanation of how the persona influenced the system prompt’s design and any key improvements made.
-    Write all responses using my communication style, characterized by structured clarity, formal tone, and detailed nuance, as seen in my previous messages.
-    输出内容必须为中文Markdown格式'''
+    Write all responses using my communication style, characterized by structured clarity, formal tone, and detailed nuance, as seen in my previous messages.'''
 
     USER_PROMPT = (
         f"风格指南如下：\n{style_guide}"
