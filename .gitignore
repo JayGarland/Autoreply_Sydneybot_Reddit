@@ -10,4 +10,4 @@ config.json
 run.log
 /subreddit_style_prompt_workflow/data
 /personas
-run.log
+/tests
