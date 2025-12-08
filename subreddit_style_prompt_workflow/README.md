@@ -79,3 +79,11 @@
 - 用户的修改意图
 
 请根据这些信息生成优化后的系统提示词。
+
+---
+
+附注：
+- `scripts/DataCollection.py` 已添加模块头部注释，概述其用途和用法（抓取子版块的热门帖子与经过过滤的高质量评论，供风格分析使用）。
+- 仓库根目录新增 `deploy_to_azure.ps1`（PowerShell 自动化部署脚本）和 `DEPLOYMENT_GUIDE.md`（详细部署说明）。
+  - 部署脚本会构建、标记并推送 Docker 镜像到您的 ACR，然后更新 Azure Container App。
+  - 如果 `az containerapp restart` 在本地 CLI 中不可用，脚本会尝试激活最新的 Container App revision 作为回退，以确保新镜像生效。

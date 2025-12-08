@@ -243,6 +243,8 @@ cp config-template.json config.json
 python app.py
 ```
 
+Note: This repository now includes an automated deployment helper script `deploy_to_azure.ps1` and a detailed `DEPLOYMENT_GUIDE.md` at the project root. The script builds, tags, pushes the Docker image to your ACR and updates the Azure Container App; it also contains a restart fallback that activates the latest revision if the `az containerapp restart` command is not available on your CLI.
+
 ### Method 2: Docker Local Execution
 
 1. **Build Docker Image**

@@ -11,7 +11,7 @@ import pickle
 # TEST SETTINGS - Edit these to configure your test
 TEST_METHOD = "random"    # Options: "at_me", "random", or None (auto)
 DRY_RUN = False          # Set to False to actually post replies
-VERBOSE = True          # Set to False for less logging
+VERBOSE = False          # Set to False for less logging
 
 def save_ignored_content():
     """Save the ignored content to pickle file"""

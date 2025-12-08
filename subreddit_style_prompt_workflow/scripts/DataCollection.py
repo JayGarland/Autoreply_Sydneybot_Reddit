@@ -1,3 +1,24 @@
+"""
+DataCollection.py - Reddit Subreddit Data Scraper
+
+This script collects top posts and comments from a specified subreddit for style analysis.
+It fetches the top posts from the last month along with their top-level comments, applying
+multiple filters to ensure quality data collection.
+
+Features:
+- Fetches top posts from the last 30 days
+- Collects top-level comments with score >= 5
+- Filters out content containing preview.redd.it links
+- Filters authors by minimum account age (30 days)
+- Saves collected data in JSON format for further processing
+
+Usage:
+    python DataCollection.py <subredditname>
+
+Output:
+    Creates a directory structure: ../data/<subredditname>_data/raw/top_posts_last_month.json
+"""
+
 import praw
 import json
 import datetime

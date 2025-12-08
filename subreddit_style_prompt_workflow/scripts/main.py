@@ -9,8 +9,8 @@ def main(subreddit):
         "ChunkData.py",
         "SummarizeChunks.py",
         "AggregateSummaries.py",
-        "SynthesizeStyleGuide.py",
-        # "GenerateSystemPrompt.py"
+        # "SynthesizeStyleGuide.py",
+        "GenerateSystemPrompt.py"
     ]
     for idx, script in enumerate(steps, 1):
         print(f"[{idx}/{len(steps)}] Running {script} for subreddit '{subreddit}'...")
